@@ -6,230 +6,546 @@
 <title>日プ新世界 推しメーカー</title>
 
 <style>
-body{
-  margin:0;
-  font-family:system-ui,-apple-system,sans-serif;
-  background:#f6f6f6;
-}
+  :root{
+    --bg:#f6f6f6;
+    --card:#ffffff;
+    --line:#e6e6e6;
+    --text:#111;
+    --muted:#666;
+    --shadow: 0 4px 14px rgba(0,0,0,.06);
+    --radius:14px;
+    --blue:#1a73e8;
+  }
+  body{
+    margin:0;
+    font-family: system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    background:var(--bg);
+    color:var(--text);
+  }
 
-/* ===== 上タイトル ===== */
-header{
-  padding:12px;
-  background:white;
-  border-bottom:1px solid #ddd;
-}
-h1{margin:0;font-size:20px}
-.by{margin:4px 0 0;font-size:13px;color:#666}
+  header{
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: rgba(255,255,255,.92);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+  .topbar{
+    padding: 12px 12px 10px;
+    max-width: 980px;
+    margin: 0 auto;
+  }
+  h1{margin:0;font-size:20px;line-height:1.2}
+  .by{margin:6px 0 0;font-size:13px;color:var(--muted)}
+  main{max-width:980px;margin:0 auto;padding:12px;}
 
-/* ===== キャプチャ範囲 ===== */
-#captureArea{
-  background:white;
-  margin:12px;
-  border-radius:14px;
-  overflow:hidden;
-  box-shadow:0 4px 12px rgba(0,0,0,.08);
-}
+  #captureArea{
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
 
-/* ===== ヘッダー画像 ===== */
-.banner{
-  height:100px;
-  background-size:cover;
-  background-position:center;
-}
+  .banner{
+    height: 100px;
+    position: relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:
+      radial-gradient(circle at 20% 30%, rgba(255,120,200,.30), transparent 40%),
+      radial-gradient(circle at 80% 40%, rgba(120,160,255,.28), transparent 45%),
+      linear-gradient(135deg, #ffe7f4, #eef3ff);
+  }
+  .banner.hasImage{
+    background-size: cover;
+    background-position: center;
+  }
+  .banner::after{
+    content:"";
+    position:absolute; inset:0;
+    background: linear-gradient(to bottom, rgba(255,255,255,.0), rgba(255,255,255,.35));
+    pointer-events:none;
+  }
+  .bannerTitle{
+    position:relative;
+    font-weight: 800;
+    letter-spacing: .06em;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.75);
+    border: 1px solid rgba(255,255,255,.85);
+    font-size: 14px;
+  }
 
-/* ===== ピラミッド ===== */
-.pyramid{
-  padding:12px;
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-}
-.row{
-  display:flex;
-  justify-content:center;
-  gap:12px;
-}
-.picked{
-  width:90px;
-  text-align:center;
-  position:relative;
-}
-.picked img{
-  width:90px;
-  height:90px;
-  border-radius:50%;
-  border:4px solid #ddd;
-  object-fit:cover;
-}
-.rank{
-  position:absolute;
-  top:-6px;
-  left:-6px;
-  background:#1a73e8;
-  color:white;
-  border-radius:50%;
-  padding:4px 8px;
-  font-size:12px;
-}
-.name{
-  font-size:11px;
-  margin-top:4px;
-}
+  .sectionTitle{
+    font-size: 15px;
+    margin: 12px 2px 8px;
+    color: var(--text);
+    font-weight: 700;
+  }
 
-/* ===== ボタン ===== */
-.actions{
-  text-align:center;
-  padding:10px;
-}
-button{
-  padding:8px 12px;
-  margin:4px;
-  border-radius:10px;
-  border:1px solid #ccc;
-  background:white;
-}
+  /* 練習生一覧 */
+  #membersWrap{
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 10px;
+    max-height: 38vh;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    box-shadow: var(--shadow);
+  }
+  #members{
+    display:grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+  }
+  @media (max-width:520px){
+    #members{grid-template-columns: repeat(3, minmax(0, 1fr));}
+  }
+  .member{
+    background: #fff;
+    border: 1px solid #efefef;
+    border-radius: 14px;
+    padding: 8px 6px;
+    text-align:center;
+    user-select:none;
+    cursor:pointer;
+  }
+  .member:active{transform: scale(.98);}
+  .member img{
+    width:72px;height:72px;object-fit:cover;
+    border-radius: 999px;
+    border: 3px solid #f1f1f1;
+    display:block;margin:0 auto 6px;
+    background:#fff;
+  }
+  .member .name{font-size:11px;line-height:1.2}
+  .member.selected{
+    opacity:.35;
+    filter: grayscale(1);
+    pointer-events:none;
+  }
+  .hint{font-size:12px;color:var(--muted);margin:6px 2px 0}
 
-/* ===== 一覧 ===== */
-#membersWrap{
-  background:white;
-  margin:12px;
-  padding:10px;
-  border-radius:14px;
-  max-height:40vh;
-  overflow:auto;
-}
-#members{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:10px;
-}
-.member{
-  text-align:center;
-  cursor:pointer;
-}
-.member img{
-  width:70px;
-  height:70px;
-  border-radius:50%;
-  border:3px solid #eee;
-}
-.member.selected{
-  opacity:.3;
-  pointer-events:none;
-}
+  /* ピラミッド */
+  .pyramidPad{padding: 10px 10px 14px;}
+  .pyramid{
+    display:flex;
+    flex-direction:column;
+    gap: 12px;
+    padding: 8px 0 6px;
+  }
+  .row{
+    display:flex;
+    justify-content:center;
+    gap: 12px;
+  }
+  .picked{
+    width: 92px;
+    text-align:center;
+    position:relative;
+    user-select:none;
+    -webkit-user-select:none;
+    touch-action: manipulation;
+  }
+  .picked .avatar{
+    width:92px;height:92px;border-radius:999px;
+    border: 5px solid #d9d9d9;
+    background:#fff;
+    overflow:hidden;
+    box-shadow: 0 6px 18px rgba(0,0,0,.10);
+    margin: 0 auto;
+  }
+  .picked img{
+    width:100%;height:100%;
+    object-fit:cover;
+    display:block;
+  }
+  .picked .name{
+    font-size:11px;
+    line-height:1.2;
+    margin-top:6px;
+    padding: 0 2px;
+  }
+  .rank{
+    position:absolute;
+    left: 6px;
+    top: 2px;
+    background: var(--blue);
+    color:#fff;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:700;
+    padding: 4px 8px;
+    border: 2px solid #fff;
+    box-shadow: 0 4px 10px rgba(0,0,0,.12);
+  }
+  .picked.swapOn{
+    outline: 3px solid rgba(26,115,232,.45);
+    border-radius: 16px;
+    padding: 2px;
+  }
+  .picked.swapPick{
+    outline: 4px solid rgba(26,115,232,.85);
+    border-radius: 16px;
+    padding: 2px;
+  }
+
+  /* ボタン */
+  .actions{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    justify-content:center;
+    padding: 0 10px 12px;
+  }
+  button{
+    padding: 11px 12px;
+    border-radius: 12px;
+    border: 1px solid #ddd;
+    background: #fff;
+    font-size: 14px;
+  }
+  button:active{transform:scale(.98)}
+  .primary{border-color: #cfe2ff;}
+  .danger{border-color:#ffd6d6;}
+  .modeOn{
+    background: rgba(26,115,232,.10);
+    border-color: rgba(26,115,232,.35);
+  }
+
+  .note{
+    margin: 0 10px 12px;
+    font-size: 12px;
+    color: var(--muted);
+    text-align:center;
+  }
+
+  .toast{
+    position: fixed;
+    left: 50%;
+    bottom: 18px;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,.78);
+    color:#fff;
+    padding: 10px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    display:none;
+    z-index:999;
+  }
 </style>
 </head>
 
 <body>
-
 <header>
-  <h1>日プ新世界 推しメーカー</h1>
-  <p class="by">created by @12agassi</p>
+  <div class="topbar">
+    <h1>日プ新世界 推しメーカー</h1>
+    <p class="by">created by @12agassi</p>
+  </div>
 </header>
 
-<!-- ===== ここが保存画像になる ===== -->
-<div id="captureArea">
-  <div id="banner" class="banner"></div>
+<main>
 
-  <div class="pyramid" id="pyramid"></div>
+  <div id="captureArea">
+    <div id="banner" class="banner">
+      <div class="bannerTitle">AUDITION PICK • YOUR TOP 11</div>
+    </div>
 
-  <div class="actions">
-    <button onclick="undo()">1人戻す</button>
-    <button onclick="resetAll()">リセット</button>
+    <div class="pyramidPad">
+      <div class="sectionTitle">選択したメンバー</div>
+      <div class="pyramid" id="pyramid"></div>
+    </div>
+
+    <div class="actions">
+      <button class="primary" onclick="saveImage()">画像として保存</button>
+      <button id="swapBtn" class="" onclick="toggleSwapMode()">並び替えモード</button>
+      <button onclick="undo()">1人戻す</button>
+      <button class="danger" onclick="resetAll()">リセット</button>
+    </div>
+    <p class="note">
+      ※最大11人まで（12人目は追加できません）／長押しで削除できます／並び替えモード中は「2回タップで入れ替え」
+    </p>
   </div>
-</div>
 
-<div id="membersWrap">
-  <div id="members"></div>
-</div>
+  <div class="sectionTitle">練習生一覧（押して追加）</div>
+  <div id="membersWrap">
+    <div id="members"></div>
+    <div class="hint">※一覧はこの枠の中だけスクロールできます</div>
+  </div>
 
-<!-- html2canvas -->
+</main>
+
+<div class="toast" id="toast">画像を生成中…</div>
+
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
 <script>
-
-/* 🔥 ヘッダー画像 ← もう入れてある */
+/* ✅ あなたのヘッダー画像（入れてある） */
 const HEADER_IMAGE_URL = "https://i.imgur.com/nYBRUdd.png";
 
-/* ===== 練習生 ===== */
+/* 練習生データ（今は5人。増やすときはここに追加） */
 const trainees=[
-{name:"アダム・ナガイ(ADAM)",img:"https://i.imgur.com/6QGzvRx.png"},
-{name:"中丸 晏寿(AJU)",img:"https://i.imgur.com/KiZCKos.png"},
-{name:"オム・スアンカワーテン(AOM)",img:"https://i.imgur.com/dDIFJSc.png"},
-{name:"アーチャー・ウイ(ARCHER)",img:"https://i.imgur.com/5iIerqN.png"},
-{name:"篠ヶ谷 歩夢(S.AYUMU)",img:"https://i.imgur.com/YJAdh8q.png"}
+  {name:"アダム・ナガイ(ADAM)",img:"https://i.imgur.com/6QGzvRx.png"},
+  {name:"中丸 晏寿(AJU)",img:"https://i.imgur.com/KiZCKos.png"},
+  {name:"オム・スアンカワーテン(AOM)",img:"https://i.imgur.com/dDIFJSc.png"},
+  {name:"アーチャー・ウイ(ARCHER)",img:"https://i.imgur.com/5iIerqN.png"},
+  {name:"篠ヶ谷 歩夢(S.AYUMU)",img:"https://i.imgur.com/YJAdh8q.png"}
 ];
 
-const rowSizes=[1,2,3,5];
-let selected=[];
+const rowSizes = [1,2,3,5];
+const STORAGE_KEY = "oshimaker_selected_v2";
 
-/* ヘッダー設定 */
-document.getElementById("banner").style.backgroundImage=`url(${HEADER_IMAGE_URL})`;
+/* selected は trainees の index 配列 */
+let selected = loadSelected();
+
+/* 並び替えモード */
+let swapMode = false;
+let swapPickIndex = null;
+
+/* ヘッダー帯 */
+(function setupBanner(){
+  const banner = document.getElementById("banner");
+  if(HEADER_IMAGE_URL){
+    banner.classList.add("hasImage");
+    banner.style.backgroundImage = `url('${HEADER_IMAGE_URL}')`;
+  }
+})();
 
 /* 一覧描画 */
 function drawMembers(){
-const el=document.getElementById("members");
-el.innerHTML="";
-trainees.forEach((m,i)=>{
-const d=document.createElement("div");
-d.className="member";
-if(selected.includes(i)) d.classList.add("selected");
-d.innerHTML=`<img src="${m.img}"><div class="name">${m.name}</div>`;
-d.onclick=()=>add(i);
-el.appendChild(d);
-});
+  const membersEl = document.getElementById("members");
+  membersEl.innerHTML="";
+  trainees.forEach((m,i)=>{
+    const div=document.createElement("div");
+    div.className="member";
+    if(selected.includes(i)) div.classList.add("selected");
+    div.innerHTML = `<img src="${m.img}" alt=""><div class="name">${m.name}</div>`;
+    div.addEventListener("click", ()=>add(i));
+    membersEl.appendChild(div);
+  });
 }
 
 /* 追加 */
 function add(i){
-if(selected.length>=11){alert("11人まで！");return;}
-selected.push(i);
-drawMembers();
-drawPyramid();
+  if(selected.length>=11){ alert("11人まで！"); return; }
+  if(selected.includes(i)) return;
+  selected.push(i);
+  saveSelected();
+  drawMembers();
+  drawPyramid();
 }
 
 /* ピラミッド描画 */
 function drawPyramid(){
-const p=document.getElementById("pyramid");
-p.innerHTML="";
-let idx=0;
-rowSizes.forEach(size=>{
-const row=document.createElement("div");
-row.className="row";
-for(let k=0;k<size;k++){
-if(idx>=selected.length) break;
-const m=trainees[selected[idx]];
-const div=document.createElement("div");
-div.className="picked";
-div.innerHTML=`
-<div class="rank">${idx+1}</div>
-<img src="${m.img}">
-<div class="name">${m.name}</div>
-`;
-row.appendChild(div);
-idx++;
-}
-p.appendChild(row);
-});
+  const p=document.getElementById("pyramid");
+  p.innerHTML="";
+
+  let idx=0;
+  rowSizes.forEach((size)=>{
+    const row=document.createElement("div");
+    row.className="row";
+
+    for(let k=0;k<size;k++){
+      if(idx>=selected.length) break;
+
+      const traineeIndex = selected[idx];
+      const m = trainees[traineeIndex];
+
+      const card=document.createElement("div");
+      card.className="picked";
+      if(swapMode) card.classList.add("swapOn");
+      if(swapPickIndex === idx) card.classList.add("swapPick");
+
+      card.dataset.pos = String(idx);
+      card.draggable = true; // PCなどでD&D可の環境向け
+
+      card.innerHTML = `
+        <div class="rank">${idx+1}</div>
+        <div class="avatar"><img src="${m.img}" alt=""></div>
+        <div class="name">${m.name}</div>
+      `;
+
+      // タップ操作（並び替え or 通常）
+      card.addEventListener("click", (e)=>onPickedClick(idx));
+
+      // 長押し削除（500ms）
+      attachLongPressDelete(card, idx);
+
+      // ドラッグ&ドロップ（対応環境のみ）
+      attachDragDrop(card, idx);
+
+      row.appendChild(card);
+      idx++;
+    }
+    p.appendChild(row);
+  });
 }
 
-/* 戻す */
+/* 長押しで削除 */
+function attachLongPressDelete(el, pos){
+  let timer = null;
+  const start = (ev)=>{
+    if(swapMode) return; // 並び替え中は長押し無効（誤操作防止）
+    clearTimeout(timer);
+    timer = setTimeout(()=>{
+      removeAt(pos);
+    }, 500);
+  };
+  const cancel = ()=>{
+    clearTimeout(timer);
+    timer = null;
+  };
+  el.addEventListener("touchstart", start, {passive:true});
+  el.addEventListener("touchend", cancel, {passive:true});
+  el.addEventListener("touchmove", cancel, {passive:true});
+  el.addEventListener("mousedown", start);
+  el.addEventListener("mouseup", cancel);
+  el.addEventListener("mouseleave", cancel);
+}
+
+/* 削除 */
+function removeAt(pos){
+  if(pos<0 || pos>=selected.length) return;
+  selected.splice(pos,1);
+  swapPickIndex = null;
+  saveSelected();
+  drawMembers();
+  drawPyramid();
+}
+
+/* 並び替えモード */
+function toggleSwapMode(){
+  swapMode = !swapMode;
+  swapPickIndex = null;
+  const btn = document.getElementById("swapBtn");
+  btn.classList.toggle("modeOn", swapMode);
+  btn.textContent = swapMode ? "並び替え中（タップで入替）" : "並び替えモード";
+  drawPyramid();
+}
+
+/* 並び替え：タップで2つ選んで入替（iPhoneで確実） */
+function onPickedClick(pos){
+  if(!swapMode) return;
+
+  if(swapPickIndex === null){
+    swapPickIndex = pos;
+    drawPyramid();
+    return;
+  }
+  if(swapPickIndex === pos){
+    swapPickIndex = null;
+    drawPyramid();
+    return;
+  }
+
+  // swap
+  const tmp = selected[swapPickIndex];
+  selected[swapPickIndex] = selected[pos];
+  selected[pos] = tmp;
+
+  swapPickIndex = null;
+  saveSelected();
+  drawMembers();
+  drawPyramid();
+}
+
+/* ドラッグ&ドロップ（対応環境向け） */
+function attachDragDrop(el, pos){
+  let dragFrom = null;
+
+  el.addEventListener("dragstart", (e)=>{
+    if(!swapMode) return e.preventDefault();
+    dragFrom = pos;
+    e.dataTransfer.setData("text/plain", String(pos));
+  });
+
+  el.addEventListener("dragover", (e)=>{
+    if(!swapMode) return;
+    e.preventDefault();
+  });
+
+  el.addEventListener("drop", (e)=>{
+    if(!swapMode) return;
+    e.preventDefault();
+    const from = Number(e.dataTransfer.getData("text/plain"));
+    const to = pos;
+    if(!Number.isInteger(from) || from===to) return;
+
+    const tmp = selected[from];
+    selected[from] = selected[to];
+    selected[to] = tmp;
+
+    saveSelected();
+    drawMembers();
+    drawPyramid();
+  });
+}
+
+/* 1人戻す */
 function undo(){
-selected.pop();
-drawMembers();
-drawPyramid();
+  selected.pop();
+  swapPickIndex = null;
+  saveSelected();
+  drawMembers();
+  drawPyramid();
 }
 
 /* リセット */
 function resetAll(){
-selected=[];
-drawMembers();
-drawPyramid();
+  selected = [];
+  swapPickIndex = null;
+  saveSelected();
+  drawMembers();
+  drawPyramid();
 }
 
+/* 保存 */
+function saveSelected(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(selected)); }catch(e){}
+}
+function loadSelected(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    const arr = raw ? JSON.parse(raw) : [];
+    return Array.isArray(arr) ? arr.filter(n=>Number.isInteger(n)) : [];
+  }catch(e){ return []; }
+}
+
+/* 画像として保存 */
+async function saveImage(){
+  if(typeof html2canvas === "undefined"){
+    alert("画像保存ライブラリの読み込みに失敗しました。スクショで保存してね！");
+    return;
+  }
+  const toast = document.getElementById("toast");
+  toast.style.display = "block";
+
+  try{
+    const canvas = await html2canvas(document.getElementById("captureArea"), {
+      backgroundColor: "#ffffff",
+      useCORS: true,
+      allowTaint: false,
+      scale: 2
+    });
+    const link = document.createElement("a");
+    link.download = "oshimaker.png";
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+  }catch(e){
+    alert("画像生成に失敗しました。iPhoneのスクショで保存してね！（画像URL側の制限の可能性あり）");
+  }finally{
+    toast.style.display = "none";
+  }
+}
+
+/* 初期描画 */
 drawMembers();
 drawPyramid();
-
 </script>
 
 </body>
