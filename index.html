@@ -8,69 +8,43 @@
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
 <style>
-:root{
-  --blue:#1a73e8;
-  --size: clamp(60px, 15vw, 92px); /* ★自動縮小（切れ防止） */
-}
-
 body{
   margin:0;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  font-family:system-ui;
   background:#f6f6f6;
 }
 
-/* =====================
-   HEADER
-===================== */
+/* ===== ヘッダー ===== */
 header{
   position:sticky;
   top:0;
   background:#fff;
-  z-index:100;
-  border-bottom:1px solid #ddd;
-  padding:12px 16px;
-}
-.by{font-size:12px;color:#666;margin-top:4px}
-
-/* =====================
-   BANNER
-===================== */
-.banner{
-  height:100px;
-  background:url("https://i.imgur.com/nYBRUdd.png") center/cover;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-.bannerTitle{
-  background:#fff;
-  padding:10px 18px;
-  border-radius:999px;
-  font-weight:900;
+  padding:12px;
+  border-bottom:1px solid #eee;
+  z-index:10;
 }
 
-/* =====================
-   PYRAMID (sticky固定)
-===================== */
-.pyramidWrap{
+/* ===== ピラミッド固定エリア ===== */
+.pyramidArea{
   position:sticky;
-  top:120px;
+  top:70px;
   background:#fff;
-  padding:18px 0 32px;
-  z-index:50;
+  z-index:5;
+  padding:14px 0 10px;
+  border-bottom:1px solid #eee;
 }
 
-.pyramid{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:20px;
+/* ===== 自動サイズ丸 ===== */
+:root{
+  --size: clamp(62px, 17vw, 88px);
 }
 
+/* ===== ピラミッド ===== */
 .row{
   display:flex;
   justify-content:center;
-  gap: calc(var(--size)*0.25);
+  gap:16px;
+  margin:12px 0;
 }
 
 .slot{
@@ -78,126 +52,125 @@ header{
   text-align:center;
 }
 
-/* 丸 */
 .avatar{
   width:var(--size);
   height:var(--size);
   border-radius:50%;
   border:5px solid #ddd;
   overflow:hidden;
-  background:#fff;
+  margin:auto;
   position:relative;
+  background:#fff;
 }
+
 .avatar img{
   width:100%;
   height:100%;
   object-fit:cover;
 }
 
-/* ★順位 真ん中下 */
+/* ===== 順位（真ん中下密着）===== */
 .rank{
   position:absolute;
   left:50%;
-  bottom:-10px;
+  bottom:-6px;
   transform:translateX(-50%);
-  background:var(--blue);
+  background:#1a73e8;
   color:#fff;
+  font-weight:bold;
   border-radius:999px;
   padding:4px 9px;
   font-size:12px;
-  font-weight:900;
-  border:3px solid #fff;
+  border:2px solid #fff;
 }
 
-/* 名前 */
+/* ===== 名前1行固定 ===== */
 .name{
-  margin-top:14px;
+  margin-top:10px;
   font-size:12px;
-  font-weight:800;
-  word-break:break-word;
+  font-weight:bold;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
 }
 
-/* 空 */
-.empty .avatar{
-  opacity:.15;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:28px;
-}
-.empty .rank,.empty .name{display:none}
-
-/* =====================
-   BUTTONS
-===================== */
+/* ===== ボタン ===== */
 .actions{
   text-align:center;
-  margin-top:14px;
+  padding:10px;
 }
 button{
-  padding:10px 16px;
   margin:4px;
-  border-radius:10px;
-  border:1px solid #ccc;
-  background:#fff;
+  padding:9px 12px;
 }
 
-/* =====================
-   SEARCH + LIST
-===================== */
+/* ===== 下の一覧（絶対安定スクロール） ===== */
 .listWrap{
-  background:#fff;
-  margin-top:10px;
-}
-
-.search{
-  padding:10px;
-}
-.search input{
-  width:100%;
-  padding:10px;
-  border:1px solid #ccc;
-  border-radius:10px;
-}
-
-#members{
-  max-height:45vh;
+  height:50vh;
   overflow:auto;
+  background:#fff;
 }
 
 .member{
   display:flex;
+  gap:10px;
   align-items:center;
   padding:10px;
   border-bottom:1px solid #eee;
   cursor:pointer;
 }
+
 .member img{
-  width:50px;height:50px;border-radius:50%;
-  margin-right:10px;object-fit:cover;
-}
-.member.selected{
-  opacity:.3;
-  pointer-events:none;
+  width:50px;
+  height:50px;
+  border-radius:50%;
 }
 
-/* =====================
-   EXPORT (保存専用1004x924)
-===================== */
-#exportArea{
+/* ===== 保存用 ===== */
+#export{
   position:fixed;
   left:-9999px;
-  top:0;
   width:1004px;
   height:924px;
   background:#fff;
-  padding:30px;
+  padding:60px;
 }
-.exportPyramid .avatar{
-  width:120px;height:120px;
+.exportRow{
+  display:flex;
+  justify-content:center;
+  gap:42px;
+  margin:26px 0;
 }
-.exportPyramid .rank{
-  bottom:-14px;
+.exportAvatar{
+  width:120px;
+  height:120px;
+  border-radius:50%;
+  border:7px solid #ddd;
+  overflow:hidden;
+  position:relative;
+}
+.exportAvatar img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+.exportRank{
+  position:absolute;
+  left:50%;
+  bottom:-6px;
+  transform:translateX(-50%);
+  background:#1a73e8;
+  color:#fff;
+  border-radius:999px;
+  padding:6px 12px;
+  font-weight:bold;
+  border:3px solid #fff;
+}
+.exportName{
+  text-align:center;
+  font-size:14px;
+  font-weight:bold;
+  margin-top:10px;
 }
 </style>
 </head>
@@ -205,16 +178,12 @@ button{
 <body>
 
 <header>
-  <b>日プ新世界 推しメーカー</b>
-  <div class="by">created by @12agassi</div>
+  <h2>日プ新世界 推しメーカー</h2>
+  <small>created by @12agassi</small>
 </header>
 
-<div class="banner">
-  <div class="bannerTitle">AUDITION PICK • YOUR TOP 11</div>
-</div>
-
-<div class="pyramidWrap">
-  <div id="pyramid" class="pyramid"></div>
+<div class="pyramidArea">
+  <div id="pyramid"></div>
 
   <div class="actions">
     <button onclick="saveImage()">画像として保存</button>
@@ -223,29 +192,19 @@ button{
   </div>
 </div>
 
-<div class="listWrap">
-  <div class="search">
-    <input id="search" placeholder="Search" oninput="drawMembers()">
-  </div>
-  <div id="members"></div>
-</div>
+<div class="listWrap" id="members"></div>
 
-<!-- 保存専用 -->
-<div id="exportArea">
-  <div id="exportPyramid" class="pyramid exportPyramid"></div>
-</div>
+<div id="export"></div>
 
 <script>
-const rows=[1,2,3,5];
-
-const trainees=[
+const trainees = [
 {name:"アダム・ナガイ(ADAM)",img:"https://i.imgur.com/6QGzvRx.png"},
 {name:"中丸 晏寿(AJU)",img:"https://i.imgur.com/KiZCKos.png"},
 {name:"オム・スアンカワーテン(AOM)",img:"https://i.imgur.com/dDIFJSc.png"},
 {name:"アーチャー・ウイ(ARCHER)",img:"https://i.imgur.com/5iIerqN.png"},
 {name:"篠ヶ谷 歩夢(S.AYUMU)",img:"https://i.imgur.com/YJAdh8q.png"},
 {name:"小林 千悟(CHISATO)",img:"https://i.imgur.com/Iu0hNBO.png"},
-{name:"加藤 大樹(K.DAIKI)",img:"https://i.imgur.com/4fRk2EB.png"},
+{name:"加藤 大樹 (K.DAIKI)",img:"https://i.imgur.com/4fRk2EB.png"},
 {name:"カク・ドンミン(DONGMIN)",img:"https://i.imgur.com/xZSQqMh.png"},
 {name:"末川 瑛太(EITA)",img:"https://i.imgur.com/alEjKCP.png"},
 {name:"保里 瑛都(H.EITO)",img:"https://i.imgur.com/IAhs4ZA.png"},
@@ -253,84 +212,94 @@ const trainees=[
 {name:"櫻井 楓真(FUMA)",img:"https://i.imgur.com/WIWI8Sx.png"}
 ];
 
+const rows=[1,2,3,5];
 let selected=[];
 
-function displayName(n){
-  return n.replace(/\(.+?\)/,'');
-}
+function clean(n){return n.replace(/\([^)]*\)/g,"")}
 
-function draw(target="pyramid"){
-  const p=document.getElementById(target);
-  p.innerHTML="";
-  let i=0;
+function draw(){
+ const p=document.getElementById("pyramid");
+ p.innerHTML="";
+ let i=0;
 
-  rows.forEach(r=>{
-    const row=document.createElement("div");
-    row.className="row";
-    for(let k=0;k<r;k++){
-      const s=document.createElement("div");
-      s.className="slot";
+ rows.forEach(r=>{
+  const row=document.createElement("div");
+  row.className="row";
 
-      if(i<selected.length){
-        const m=trainees[selected[i]];
-        s.innerHTML=`
-          <div class="avatar">
-            <img src="${m.img}">
-            <div class="rank">${i+1}</div>
-          </div>
-          <div class="name">${displayName(m.name)}</div>
-        `;
-      }else{
-        s.classList.add("empty");
-        s.innerHTML=`<div class="avatar">＋</div>`;
-      }
-      row.appendChild(s);
-      i++;
+  for(let k=0;k<r;k++){
+    const s=document.createElement("div");
+    s.className="slot";
+
+    if(selected[i]!=null){
+      const t=trainees[selected[i]];
+      s.innerHTML=`
+        <div class="avatar">
+          <img src="${t.img}">
+          <div class="rank">${i+1}</div>
+        </div>
+        <div class="name">${clean(t.name)}</div>
+      `;
+    }else{
+      s.innerHTML=`<div class="avatar" style="opacity:.2"></div>`;
     }
-    p.appendChild(row);
-  });
+    row.appendChild(s);
+    i++;
+  }
+  p.appendChild(row);
+ });
 }
 
-function drawMembers(){
-  const q=document.getElementById("search").value.toLowerCase();
-  const box=document.getElementById("members");
-  box.innerHTML="";
-
-  trainees.forEach((m,i)=>{
-    if(q && !m.name.toLowerCase().includes(q)) return;
-
-    const d=document.createElement("div");
-    d.className="member";
-    if(selected.includes(i)) d.classList.add("selected");
-
-    d.innerHTML=`<img src="${m.img}">${displayName(m.name)}`;
-    d.onclick=()=>{
-      if(selected.length<11){
-        selected.push(i);
-        draw();
-        draw("exportPyramid");
-        drawMembers();
-      }
-    };
-    box.appendChild(d);
-  });
+function drawList(){
+ const m=document.getElementById("members");
+ m.innerHTML="";
+ trainees.forEach((t,i)=>{
+   const d=document.createElement("div");
+   d.className="member";
+   d.innerHTML=`<img src="${t.img}"><div>${clean(t.name)}</div>`;
+   d.onclick=()=>{if(selected.length<11) selected.push(i); draw();}
+   m.appendChild(d);
+ });
 }
 
-function saveImage(){
-  draw("exportPyramid");
-  html2canvas(document.getElementById("exportArea"),{scale:2}).then(c=>{
-    const a=document.createElement("a");
-    a.href=c.toDataURL();
-    a.download="oshimaker.png";
-    a.click();
-  });
-}
+function undo(){selected.pop();draw();}
+function resetAll(){selected=[];draw();}
 
-function undo(){selected.pop();draw();drawMembers();}
-function resetAll(){selected=[];draw();drawMembers();}
+async function saveImage(){
+ const ex=document.getElementById("export");
+ ex.innerHTML="";
+ let i=0;
+
+ rows.forEach(r=>{
+  const row=document.createElement("div");
+  row.className="exportRow";
+
+  for(let k=0;k<r;k++){
+    const s=document.createElement("div");
+    if(selected[i]!=null){
+      const t=trainees[selected[i]];
+      s.innerHTML=`
+        <div class="exportAvatar">
+          <img src="${t.img}">
+          <div class="exportRank">${i+1}</div>
+        </div>
+        <div class="exportName">${clean(t.name)}</div>
+      `;
+    }
+    row.appendChild(s);
+    i++;
+  }
+  ex.appendChild(row);
+ });
+
+ const canvas=await html2canvas(ex,{scale:2});
+ const a=document.createElement("a");
+ a.download="oshimaker.png";
+ a.href=canvas.toDataURL();
+ a.click();
+}
 
 draw();
-drawMembers();
+drawList();
 </script>
 
 </body>
