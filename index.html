@@ -1,62 +1,170 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>日プ新世界 推しメーカー</title>
+
+<style>
+  body{font-family:system-ui,-apple-system,sans-serif;margin:0;background:#f6f6f6;}
+  header{position:sticky;top:0;background:white;border-bottom:1px solid #e5e5e5;padding:14px 12px;z-index:10;}
+  h1{font-size:20px;margin:0 0 6px;}
+  .by{margin:0;color:#555;font-size:13px}
+  main{padding:12px;max-width:980px;margin:0 auto;}
+
+  .sectionTitle{font-size:16px;margin:14px 0 8px;text-align:left}
+
+  /* 練習生一覧：ここがスクロール枠 */
+  #membersWrap{
+    background:white;
+    border:1px solid #e5e5e5;
+    border-radius:12px;
+    padding:10px;
+    max-height:38vh;      /* 画面の約4割を一覧に */
+    overflow:auto;        /* スクロール可能に */
+    -webkit-overflow-scrolling:touch;
+  }
+  #members{
+    display:grid;
+    grid-template-columns:repeat(4, minmax(0, 1fr));
+    gap:10px;
+  }
+  @media (max-width:520px){
+    #members{grid-template-columns:repeat(3, minmax(0, 1fr));}
+  }
+  .member{
+    background:#fff;
+    border:1px solid #eee;
+    border-radius:12px;
+    padding:8px 6px;
+    cursor:pointer;
+    text-align:center;
+    user-select:none;
+  }
+  .member img{
+    width:72px;height:72px;object-fit:cover;border-radius:10px;display:block;margin:0 auto 6px;
+  }
+  .member .name{font-size:11px;line-height:1.2}
+  .hint{font-size:12px;color:#666;margin:6px 2px 0}
+
+  /* 選択したメンバー（下側） */
+  #pyramidWrap{
+    background:white;
+    border:1px solid #e5e5e5;
+    border-radius:12px;
+    padding:10px;
+  }
+  #pyramid{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+  }
+  .picked{
+    width:92px;
+    text-align:center;
+    position:relative;
+  }
+  .picked img{
+    width:92px;height:92px;object-fit:cover;border-radius:12px;border:1px solid #eee;
+  }
+  .picked .name{font-size:11px;line-height:1.2;margin-top:4px}
+  .rank{
+    position:absolute;top:-8px;left:-8px;
+    background:#111;color:white;border-radius:999px;
+    font-size:11px;padding:4px 7px;
+  }
+  .actions{display:flex;gap:8px;margin-top:10px}
+  button{
+    padding:10px 12px;border-radius:10px;border:1px solid #ddd;background:white;
+    font-size:14px;
+  }
+  button:active{transform:scale(0.98)}
+</style>
 </head>
 
 <body>
+<header>
+  <h1>日プ新世界 推しメーカー</h1>
+  <p class="by">created by @12agassi</p>
+</header>
 
-<h1>日プ新世界 推しメーカー</h1>
-<p>created by @12agassi</p>
+<main>
+  <div class="sectionTitle">練習生一覧（押して追加）</div>
+  <div id="membersWrap">
+    <div id="members"></div>
+    <div class="hint">※一覧はこの枠の中だけスクロールできます</div>
+  </div>
 
-<h2>練習生一覧（押して追加）</h2>
-<div id="members"></div>
-
-<h2>選択したメンバー</h2>
-<div id="pyramid"></div>
+  <div class="sectionTitle">選択したメンバー</div>
+  <div id="pyramidWrap">
+    <div id="pyramid"></div>
+    <div class="actions">
+      <button onclick="undo()">1人戻す</button>
+      <button onclick="resetAll()">リセット</button>
+    </div>
+    <p class="hint">※最大11人まで（12人目は追加できません）</p>
+  </div>
+</main>
 
 <script>
-
 const trainees=[
-{name:"アダム・ナガイ(ADAM)",img:"https://i.imgur.com/6QGzvRx.png"},
-{name:"中丸 晏寿(AJU)",img:"https://i.imgur.com/KiZCKos.png"},
-{name:"オム・スアンカワーテン(AOM)",img:"https://i.imgur.com/dDIFJSc.png"},
-{name:"アーチャー・ウイ(ARCHER)",img:"https://i.imgur.com/5iIerqN.png"},
-{name:"篠ヶ谷 歩夢(S.AYUMU)",img:"https://i.imgur.com/YJAdh8q.png"}
+  {name:"アダム・ナガイ(ADAM)",img:"https://i.imgur.com/6QGzvRx.png"},
+  {name:"中丸 晏寿(AJU)",img:"https://i.imgur.com/KiZCKos.png"},
+  {name:"オム・スアンカワーテン(AOM)",img:"https://i.imgur.com/dDIFJSc.png"},
+  {name:"アーチャー・ウイ(ARCHER)",img:"https://i.imgur.com/5iIerqN.png"},
+  {name:"篠ヶ谷 歩夢(S.AYUMU)",img:"https://i.imgur.com/YJAdh8q.png"}
 ];
 
 let selected=[];
 
 function drawMembers(){
-let html="";
-trainees.forEach((m,i)=>{
-html+=`
-<div onclick="add(${i})" style="display:inline-block;margin:10px;cursor:pointer;text-align:center;">
-<img src="${m.img}" width="80"><br>${m.name}
-</div>`;
-});
-document.getElementById("members").innerHTML=html;
+  const membersEl=document.getElementById("members");
+  membersEl.innerHTML="";
+  trainees.forEach((m,i)=>{
+    const div=document.createElement("div");
+    div.className="member";
+    div.innerHTML=`<img src="${m.img}" alt=""><div class="name">${m.name}</div>`;
+    div.addEventListener("click", ()=>add(i));
+    membersEl.appendChild(div);
+  });
 }
 
 function add(i){
-selected.push(trainees[i]);
-drawPyramid();
+  if(selected.length>=11){
+    alert("11人まで！");
+    return;
+  }
+  selected.push(trainees[i]);
+  drawPicked();
 }
 
-function drawPyramid(){
-let html="";
-selected.forEach(m=>{
-html+=`
-<div style="display:inline-block;margin:5px;text-align:center;">
-<img src="${m.img}" width="80"><br>${m.name}
-</div>`;
-});
-document.getElementById("pyramid").innerHTML=html;
+function drawPicked(){
+  const p=document.getElementById("pyramid");
+  p.innerHTML="";
+  selected.forEach((m,idx)=>{
+    const div=document.createElement("div");
+    div.className="picked";
+    div.innerHTML=`
+      <div class="rank">${idx+1}</div>
+      <img src="${m.img}" alt="">
+      <div class="name">${m.name}</div>
+    `;
+    p.appendChild(div);
+  });
+}
+
+function undo(){
+  selected.pop();
+  drawPicked();
+}
+
+function resetAll(){
+  selected=[];
+  drawPicked();
 }
 
 drawMembers();
-
+drawPicked();
 </script>
 
 </body>
