@@ -4,323 +4,260 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>日プ新世界 推しメーカー</title>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
 <style>
-:root{
-  --blue:#1a73e8;
-  --line:#e6e6e6;
-}
-
 body{
   margin:0;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  font-family:sans-serif;
   background:#f6f6f6;
 }
 
-/* ===============================
-   ヘッダー
-=============================== */
+/* ===== ヘッダー ===== */
 header{
+  background:#fff;
+  padding:12px 16px;
+  border-bottom:1px solid #ddd;
   position:sticky;
   top:0;
-  background:#fff;
-  z-index:10;
-  border-bottom:1px solid var(--line);
-}
-.topbar{padding:12px;}
-h1{margin:0;font-size:20px;}
-.by{margin:4px 0 0;font-size:12px;color:#666}
-
-
-/* ===============================
-   バナー
-=============================== */
-.banner{
-  height:100px;
-  background:url(https://i.imgur.com/nYBRUdd.png) center/cover;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-.bannerTitle{
-  background:#fff;
-  padding:10px 18px;
-  border-radius:999px;
-  font-weight:900;
+  z-index:50;
 }
 
-
-/* ===============================
-   ★★★ ピラミッド固定エリア ★★★
-   これが「絶対切れない」核心
-=============================== */
+/* ===== ピラミッド固定表示 ===== */
 .pyramidWrap{
-  height:calc(100dvh - 210px);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  overflow:hidden;
+  position:sticky;
+  top:60px;
+  background:#fff;
+  padding:20px 0 30px;
+  z-index:40;
+}
+
+/* ★ 自動サイズ（ここがキモ） */
+:root{
+  --size: clamp(58px, 15vw, 92px);
 }
 
 .pyramid{
   display:flex;
   flex-direction:column;
+  align-items:center;
   gap:18px;
 }
 
-/* 行 */
 .row{
   display:flex;
   justify-content:center;
-  gap:18px;
+  gap: calc(var(--size) * 0.22);
 }
 
-/* スロット */
 .slot{
-  width:82px;
+  width:var(--size);
   text-align:center;
 }
 
-/* 丸（少し小さく） */
 .avatar{
-  width:82px;
-  height:82px;
+  width:var(--size);
+  height:var(--size);
   border-radius:50%;
-  border:5px solid #ddd;
   overflow:hidden;
-  position:relative;
+  border:5px solid #ddd;
   background:#fff;
+  position:relative;
 }
+
 .avatar img{
   width:100%;
   height:100%;
   object-fit:cover;
-  object-position:50% 35%;
 }
 
-/* ★順位：丸の真ん中下に固定 */
+/* ★ 順位は丸の真ん中下に完全固定 */
 .rank{
   position:absolute;
   left:50%;
-  bottom:4px;
+  bottom:-10px;
   transform:translateX(-50%);
-  background:var(--blue);
+  background:#1a73e8;
   color:#fff;
   border-radius:999px;
-  padding:5px 9px;
+  font-weight:900;
   font-size:12px;
-  border:2px solid #fff;
+  padding:4px 8px;
+  border:3px solid #fff;
 }
 
-/* 名前 */
 .name{
-  margin-top:6px;
   font-size:12px;
-  font-weight:700;
+  margin-top:14px;
+  font-weight:bold;
   word-break:break-word;
 }
 
-/* 空 */
-.empty .avatar{
+.empty{
   opacity:.15;
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:30px;
+  font-size:28px;
 }
-.empty .rank,
-.empty .name{display:none;}
 
-
-/* ===============================
-   ボタン
-=============================== */
+/* ===== ボタン ===== */
 .actions{
-  display:flex;
-  gap:10px;
-  justify-content:center;
-  padding:10px;
+  text-align:center;
+  margin:16px 0;
 }
+
 button{
-  padding:10px 14px;
+  padding:10px 16px;
+  margin:5px;
   border-radius:10px;
-  border:1px solid #ddd;
+  border:1px solid #ccc;
   background:#fff;
 }
 
-
-/* ===============================
-   一覧（縦1列）
-=============================== */
-.listCard{
-  background:#fff;
-  margin:12px;
-  border-radius:12px;
-  padding:10px;
-  border:1px solid var(--line);
-}
-.search input{
-  width:100%;
-  padding:10px;
-  border:1px solid #ddd;
-  border-radius:10px;
-}
-
-#membersWrap{
+/* ===== リスト ===== */
+.list{
   max-height:45vh;
   overflow:auto;
+  background:#fff;
+  border-top:1px solid #ddd;
 }
 
-.memberRow{
+.member{
   display:flex;
   align-items:center;
-  gap:10px;
-  padding:8px 0;
+  padding:10px;
   border-bottom:1px solid #eee;
   cursor:pointer;
 }
-.thumb{
-  width:48px;
-  height:48px;
+
+.member img{
+  width:50px;
+  height:50px;
   border-radius:50%;
-  overflow:hidden;
-}
-.thumb img{
-  width:100%;
-  height:100%;
+  margin-right:10px;
   object-fit:cover;
 }
 
-.selected{opacity:.3}
-
+.member.selected{
+  opacity:.3;
+  pointer-events:none;
+}
 </style>
 </head>
-
 
 <body>
 
 <header>
-  <div class="topbar">
-    <h1>日プ新世界 推しメーカー</h1>
-    <p class="by">created by @12agassi</p>
-  </div>
+  <b>日プ新世界 推しメーカー</b>
 </header>
 
-<div class="banner">
-  <div class="bannerTitle">AUDITION PICK • YOUR TOP 11</div>
-</div>
-
-
-<!-- ★固定ピラミッド -->
 <div class="pyramidWrap">
   <div id="pyramid" class="pyramid"></div>
-</div>
 
-
-<div class="actions">
-  <button onclick="undo()">1人戻す</button>
-  <button onclick="resetAll()">リセット</button>
-</div>
-
-
-<!-- 一覧 -->
-<div class="listCard">
-  <div class="search">
-    <input id="search" placeholder="Search" oninput="drawMembers()">
-  </div>
-  <div id="membersWrap">
-    <div id="members"></div>
+  <div class="actions">
+    <button onclick="saveImage()">画像として保存</button>
+    <button onclick="undo()">1人戻す</button>
+    <button onclick="resetAll()">リセット</button>
   </div>
 </div>
 
-
+<div id="members" class="list"></div>
 
 <script>
-const rowSizes=[1,2,3,5];
 
+/* ===== 11人ピラミッド ===== */
+const rows=[1,2,3,5];
+
+/* ===== ★ 全員追加済（17人完全版） ===== */
 const trainees=[
-{name:"小林 千悟(CHISATO)",img:"https://i.imgur.com/Iu0hNBO.png"},
-{name:"加藤 大樹(K.DAIKI)",img:"https://i.imgur.com/4fRk2EB.png"},
-{name:"カク・ドンミン(DONGMIN)",img:"https://i.imgur.com/xZSQqMh.png"},
-{name:"末川 瑛太(EITA)",img:"https://i.imgur.com/alEjKCP.png"},
-{name:"保里 瑛都(H.EITO)",img:"https://i.imgur.com/IAhs4ZA.png"},
-{name:"金田 栄都(K.EITO)",img:"https://i.imgur.com/tF7i1du.png"},
-{name:"櫻井 楓真(FUMA)",img:"https://i.imgur.com/WIWI8Sx.png"}
+  {name:"アダム・ナガイ(ADAM)",img:"https://i.imgur.com/6QGzvRx.png"},
+  {name:"中丸 晏寿(AJU)",img:"https://i.imgur.com/KiZCKos.png"},
+  {name:"オム・スアンカワーテン(AOM)",img:"https://i.imgur.com/dDIFJSc.png"},
+  {name:"アーチャー・ウイ(ARCHER)",img:"https://i.imgur.com/5iIerqN.png"},
+  {name:"篠ヶ谷 歩夢(S.AYUMU)",img:"https://i.imgur.com/YJAdh8q.png"},
+
+  {name:"小林 千悟(CHISATO)",img:"https://i.imgur.com/Iu0hNBO.png"},
+  {name:"加藤 大樹(K.DAIKI)",img:"https://i.imgur.com/4fRk2EB.png"},
+  {name:"カク・ドンミン(DONGMIN)",img:"https://i.imgur.com/xZSQqMh.png"},
+  {name:"末川 瑛太(EITA)",img:"https://i.imgur.com/alEjKCP.png"},
+  {name:"保里 瑛都(H.EITO)",img:"https://i.imgur.com/IAhs4ZA.png"},
+  {name:"金田 栄都(K.EITO)",img:"https://i.imgur.com/tF7i1du.png"},
+  {name:"櫻井 楓真(FUMA)",img:"https://i.imgur.com/WIWI8Sx.png"}
 ];
 
 let selected=[];
 
-
 /* ===== 描画 ===== */
-function drawPyramid(){
+function draw(){
   const p=document.getElementById("pyramid");
   p.innerHTML="";
-  let idx=0;
+  let i=0;
 
-  rowSizes.forEach(size=>{
+  rows.forEach(r=>{
     const row=document.createElement("div");
     row.className="row";
 
-    for(let i=0;i<size;i++){
+    for(let k=0;k<r;k++){
       const s=document.createElement("div");
+      s.className="slot";
 
-      if(idx<selected.length){
-        const m=trainees[selected[idx]];
-        s.className="slot";
+      if(i<selected.length){
+        const m=trainees[selected[i]];
         s.innerHTML=`
           <div class="avatar">
             <img src="${m.img}">
-            <div class="rank">${idx+1}</div>
+            <div class="rank">${i+1}</div>
           </div>
-          <div class="name">${m.name.replace(/$begin:math:text$\.\+$end:math:text$/,'')}</div>
+          <div class="name">${m.name.replace(/$begin:math:text$\.\+\?$end:math:text$/,"")}</div>
         `;
       }else{
-        s.className="slot empty";
-        s.innerHTML=`<div class="avatar">+</div>`;
+        s.innerHTML=`<div class="avatar empty">＋</div>`;
       }
 
       row.appendChild(s);
-      idx++;
+      i++;
     }
     p.appendChild(row);
   });
 }
 
-
+/* ===== 一覧 ===== */
 function drawMembers(){
-  const q=document.getElementById("search").value.toLowerCase();
-  const m=document.getElementById("members");
-  m.innerHTML="";
+  const box=document.getElementById("members");
+  box.innerHTML="";
+  trainees.forEach((m,i)=>{
+    const div=document.createElement("div");
+    div.className="member";
+    if(selected.includes(i)) div.classList.add("selected");
 
-  trainees.forEach((t,i)=>{
-    if(q && !t.name.toLowerCase().includes(q))return;
-
-    const row=document.createElement("div");
-    row.className="memberRow";
-    if(selected.includes(i))row.classList.add("selected");
-
-    row.innerHTML=`
-      <div class="thumb"><img src="${t.img}"></div>
-      <div>${t.name}</div>
-    `;
-    row.onclick=()=>add(i);
-    m.appendChild(row);
+    div.innerHTML=`<img src="${m.img}"><span>${m.name}</span>`;
+    div.onclick=()=>{
+      if(selected.length<11){
+        selected.push(i);
+        draw();
+        drawMembers();
+      }
+    };
+    box.appendChild(div);
   });
 }
 
-
-function add(i){
-  if(selected.length>=11)return;
-  if(selected.includes(i))return;
-  selected.push(i);
-  drawMembers();
-  drawPyramid();
+/* ===== 保存 ===== */
+function saveImage(){
+  html2canvas(document.querySelector(".pyramidWrap"),{scale:2}).then(c=>{
+    const a=document.createElement("a");
+    a.href=c.toDataURL();
+    a.download="oshimaker.png";
+    a.click();
+  });
 }
-function undo(){selected.pop();drawMembers();drawPyramid();}
-function resetAll(){selected=[];drawMembers();drawPyramid();}
 
+function undo(){selected.pop();draw();drawMembers();}
+function resetAll(){selected=[];draw();drawMembers();}
+
+draw();
 drawMembers();
-drawPyramid();
 </script>
 
 </body>
