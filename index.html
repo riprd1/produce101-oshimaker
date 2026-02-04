@@ -16,7 +16,7 @@
     --radius:14px;
     --blue:#1a73e8;
 
-    /* ★ここはJSで自動上書きする（初回表示でピラミッドが必ず収まる） */
+    /* ★JSで自動調整（幅/高さどっちも見て「必ず収まる」） */
     --slot: 82px;
     --gap:  16px;
   }
@@ -91,7 +91,7 @@
 
   /* ピラミッド */
   .pyramidWrap{
-    padding: 12px 10px 8px;
+    padding: 12px 14px 8px; /* ★左右余白を少し増やして切れにくく */
   }
   .pyramid{
     display:flex;
@@ -130,7 +130,7 @@
     display:block;
   }
 
-  /* 順位：丸の下に半分かかる（くっつく） */
+  /* ★順位：数字を小さく／白枠なし／必ず前面 */
   .rank{
     position:absolute;
     left:50%;
@@ -140,13 +140,15 @@
     color:#fff;
     border-radius:999px;
     font-weight:900;
-    font-size: 12px;
-    padding: 6px 10px;
-    border: 3px solid #fff;
+    font-size: 11px;           /* ★少し小さく */
+    padding: 5px 9px;
+    border: none;              /* ★白枠消す */
     line-height:1;
-    min-width: 2.2em;
+    min-width: 2.1em;
     text-align:center;
-    z-index:5;
+    z-index: 999;              /* ★絶対前面 */
+    box-shadow: 0 6px 14px rgba(0,0,0,.18);
+    pointer-events:none;
   }
 
   /* 名前：基本1行 */
@@ -289,7 +291,7 @@
   .memberRow.selected{
     opacity:.35;
     filter: grayscale(1);
-    pointer-events:none; /* ★同じ人を何回も選べない */
+    pointer-events:none;
   }
 
   .toast{
@@ -384,6 +386,8 @@
     object-position: 50% 35%;
     display:block;
   }
+
+  /* ★保存画像側も同じ：小さめ／白枠なし／前面 */
   .exportRank{
     position:absolute;
     left:50%;
@@ -393,14 +397,17 @@
     color:#fff;
     border-radius:999px;
     font-weight:900;
-    font-size: 16px;
-    padding: 7px 12px;
-    border: 3px solid #fff;
+    font-size: 14px;     /* 少し小さく */
+    padding: 7px 11px;
+    border:none;         /* 白枠なし */
     line-height:1;
-    min-width: 2.4em;
+    min-width: 2.3em;
     text-align:center;
-    z-index: 10;
+    z-index: 999;
+    box-shadow: 0 8px 16px rgba(0,0,0,.18);
+    pointer-events:none;
   }
+
   .exportName{
     margin-top: 18px;
     font-size: 16px;
@@ -445,8 +452,6 @@
 </header>
 
 <main>
-
-  <!-- 上：ピラミッド（固定しない） -->
   <div class="card" id="pyramidCard">
     <div id="banner" class="banner">
       <div class="bannerTitle">AUDITION PICK • YOUR TOP 11</div>
@@ -464,7 +469,6 @@
     </div>
   </div>
 
-  <!-- 下：練習生一覧（そのまま） -->
   <div class="listCard">
     <div class="searchRow">
       <div class="search">
@@ -475,12 +479,10 @@
       <div id="members"></div>
     </div>
   </div>
-
 </main>
 
 <div class="toast" id="toast">画像を生成中…</div>
 
-<!-- 保存専用（画面外） -->
 <div id="exportArea" aria-hidden="true">
   <div id="exportInner">
     <div id="exportBanner" class="exportBanner">
@@ -498,10 +500,8 @@
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
 <script>
-/* ===== 設定 ===== */
 const HEADER_IMAGE_URL = "https://i.imgur.com/nYBRUdd.png";
 
-/* 練習生（送ってくれた全員） */
 const trainees = [
   {name:"アダム・ナガイ(ADAM)", img:"https://i.imgur.com/6QGzvRx.png"},
   {name:"中丸 晏寿(AJU)", img:"https://i.imgur.com/KiZCKos.png"},
@@ -519,12 +519,12 @@ const trainees = [
 ];
 
 const rowSizes = [1,2,3,5];
-const STORAGE_KEY = "oshimaker_selected_final_v3";
+const STORAGE_KEY = "oshimaker_selected_final_v4";
 
 let reorderMode = false;
 let selected = loadSelected();
 
-/* ===== ヘッダー画像を反映 ===== */
+/* バナー画像反映 */
 (function setupBanners(){
   const banner = document.getElementById("banner");
   const exportBanner = document.getElementById("exportBanner");
@@ -535,7 +535,6 @@ let selected = loadSelected();
   }
 })();
 
-/* ===== ()の英字を除外して表示 ===== */
 function displayName(full){
   return (full || "").replace(/\s*\([^)]*\)\s*/g, "").trim();
 }
@@ -544,47 +543,60 @@ function alphaPart(full){
   return m ? "(" + m[1] + ")" : "";
 }
 
-/* ===== 初回：URL開いたときにピラミッドが確実に見えるよう自動調整 =====
-   - 画面の高さに合わせて --slot / --gap を自動で小さくする
-*/
+/* ★幅・高さどっちも見て「11個が絶対に切れない」ようにslot/gapを決定 */
 function fitPyramidToViewport(){
+  const headerH = document.querySelector("header")?.getBoundingClientRect().height || 60;
+
   const card = document.getElementById("pyramidCard");
   const wrap = document.getElementById("pyramidWrap");
   if(!card || !wrap) return;
 
-  // iOS Safariの見え方誤差を考慮して少し余裕
-  const headerH = document.querySelector("header")?.getBoundingClientRect().height || 60;
-  const available = window.innerHeight - headerH - 12 /*main padding top*/ - 12 /*main padding bottom*/ - 6;
+  const cardRect = card.getBoundingClientRect();
+  const wrapRect = wrap.getBoundingClientRect();
 
-  // カード自体が available を超えると「開いた瞬間に全部見えない」ので、slot/gapを縮める
-  // 初期値
-  let slot = 88;
-  let gap  = 18;
+  // 使える幅（カード内）
+  const availableW = cardRect.width - 28; // pyramidWrapの左右padding分ざっくり差し引き（14*2）
+  // 使える高さ（画面内に「見切れず」収めたい）
+  const availableH = window.innerHeight - headerH - 12 /*main pad*/ - 12;
 
   const bannerH = 110;
-  const actionsH = 62; // だいたい
-  const wrapPad = 12+8+10; // pyramidWrap +内部padding目安
+  const actionsH = 72;  // ボタン行のだいたい
+  const wrapPad = 12+8+10;
+  const nameH = 16;
+  const badgeOut = 14;  // バッジが下に出る分
 
-  // ピラミッドの行数 = 4
-  // 必要高さ ≒ banner + actions + padding + (slot*4) + (gap*3) + 名札(1行×4) + バッジ余白
-  const nameH = 16;     // 1行分
-  const badgeOut = 10;  // バッジが外に出る分
+  const maxRow = 5; // 1,2,3,5の最大
+
+  // 初期値（大きめから縮める）
+  let slot = 92;
+  let gap  = 18;
 
   function needHeight(s,g){
     return bannerH + actionsH + wrapPad + (s*4) + (g*3) + (nameH*4) + badgeOut;
   }
+  function needSlotByWidth(g){
+    // 5人が横に並ぶのに必要なslot上限
+    // slot*5 + gap*4 <= availableW
+    return Math.floor((availableW - g*(maxRow-1)) / maxRow);
+  }
 
-  while(needHeight(slot,gap) > available && slot > 62){
+  // 幅制約でslotをまず落とす
+  slot = Math.min(slot, needSlotByWidth(gap));
+
+  // 高さ制約も満たすまで縮める
+  while((needHeight(slot,gap) > availableH || slot*maxRow + gap*(maxRow-1) > availableW) && slot > 62){
     slot -= 2;
+    if(slot < needSlotByWidth(gap)) slot = needSlotByWidth(gap);
     gap  -= 1;
     if(gap < 10) gap = 10;
+    slot = Math.min(slot, needSlotByWidth(gap));
   }
 
   document.documentElement.style.setProperty("--slot", slot + "px");
   document.documentElement.style.setProperty("--gap", gap + "px");
 }
 
-/* ===== 一覧描画（検索） ===== */
+/* 一覧描画 */
 function drawMembers(){
   const q = (document.getElementById("search").value || "").trim().toLowerCase();
   const membersEl = document.getElementById("members");
@@ -596,7 +608,7 @@ function drawMembers(){
 
     const row = document.createElement("div");
     row.className = "memberRow";
-    if(selected.includes(i)) row.classList.add("selected"); // ★重複防止
+    if(selected.includes(i)) row.classList.add("selected");
 
     row.innerHTML = `
       <div class="thumb"><img src="${m.img}" alt=""></div>
@@ -610,37 +622,35 @@ function drawMembers(){
   });
 }
 
-/* ===== 追加（重複不可） ===== */
 function add(i){
   if(selected.length >= 11){ alert("11人まで！"); return; }
   if(selected.includes(i)) return;
-
   selected.push(i);
   saveSelected();
-
-  // ★自動で上に戻さない
   drawMembers();
   drawPyramid();
   drawExportPyramid();
+  fitPyramidToViewport(); // ★追加後も切れないよう再計算
 }
 
-/* ===== 戻す/リセット ===== */
 function undo(){
   selected.pop();
   saveSelected();
   drawMembers();
   drawPyramid();
   drawExportPyramid();
+  fitPyramidToViewport();
 }
+
 function resetAll(){
   selected = [];
   saveSelected();
   drawMembers();
   drawPyramid();
   drawExportPyramid();
+  fitPyramidToViewport();
 }
 
-/* ===== ローカル保存 ===== */
 function saveSelected(){
   try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(selected)); }catch(e){}
 }
@@ -649,12 +659,9 @@ function loadSelected(){
     const raw = localStorage.getItem(STORAGE_KEY);
     const arr = raw ? JSON.parse(raw) : [];
     return Array.isArray(arr) ? arr.filter(n=>Number.isInteger(n)) : [];
-  }catch(e){
-    return [];
-  }
+  }catch(e){ return []; }
 }
 
-/* ===== 並び替えモード ===== */
 function toggleReorder(){
   reorderMode = !reorderMode;
   document.body.classList.toggle("reorder-on", reorderMode);
@@ -674,19 +681,17 @@ function swap(posA, posB){
 function moveLeft(pos){ swap(pos, pos-1); }
 function moveRight(pos){ swap(pos, pos+1); }
 
-/* ===== ピラミッド描画（＋あり） ===== */
 function drawPyramid(){
   const p = document.getElementById("pyramid");
   p.innerHTML = "";
-
   let idx = 0;
+
   rowSizes.forEach((size)=>{
     const row = document.createElement("div");
     row.className = "row";
 
     for(let k=0;k<size;k++){
       const slot = document.createElement("div");
-
       if(idx < selected.length){
         const m = trainees[selected[idx]];
         slot.className = "slot";
@@ -705,7 +710,6 @@ function drawPyramid(){
         slot.className = "slot empty";
         slot.innerHTML = `<div class="avatar">+</div>`;
       }
-
       row.appendChild(slot);
       idx++;
     }
@@ -713,19 +717,17 @@ function drawPyramid(){
   });
 }
 
-/* ===== 保存用ピラミッド（1004×924） ===== */
 function drawExportPyramid(){
   const p = document.getElementById("exportPyramid");
   p.innerHTML = "";
-
   let idx = 0;
+
   rowSizes.forEach((size)=>{
     const row = document.createElement("div");
     row.className = "exportRow";
 
     for(let k=0;k<size;k++){
       const slot = document.createElement("div");
-
       if(idx < selected.length){
         const m = trainees[selected[idx]];
         slot.className = "exportSlot";
@@ -740,7 +742,6 @@ function drawExportPyramid(){
         slot.className = "exportSlot exportEmpty";
         slot.innerHTML = `<div class="exportAvatar">+</div>`;
       }
-
       row.appendChild(slot);
       idx++;
     }
@@ -748,7 +749,6 @@ function drawExportPyramid(){
   });
 }
 
-/* ===== 画像保存 ===== */
 async function saveImage(){
   if(typeof html2canvas === "undefined"){
     alert("画像保存ライブラリの読み込みに失敗しました。");
@@ -784,11 +784,8 @@ async function saveImage(){
 drawMembers();
 drawPyramid();
 drawExportPyramid();
-
-/* ★URLを開いた瞬間にピラミッドが見えるように調整 */
 fitPyramidToViewport();
 window.addEventListener("resize", ()=>fitPyramidToViewport());
 </script>
-
 </body>
 </html>
