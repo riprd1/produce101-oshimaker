@@ -1,460 +1,561 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>日プ新世界 推しメーカー</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>日プ新世界 推しメーカー</title>
 
-  <style>
-    :root{
-      --bg:#f6f6f6;
-      --card:#ffffff;
-      --line:#e6e6e6;
-      --text:#111;
-      --muted:#666;
-      --shadow: 0 4px 14px rgba(0,0,0,.06);
-      --radius:14px;
-      --blue:#1a73e8;
-      --ring:#d9d9d9;
-    }
+<style>
+  :root{
+    --bg:#f3f4f6;
+    --card:#ffffff;
+    --line:#e6e6e6;
+    --text:#111;
+    --muted:#666;
+    --shadow: 0 8px 24px rgba(0,0,0,.08);
+    --radius:16px;
+    --blue:#1a73e8;
 
-    body{
-      margin:0;
-      font-family: system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-      background:var(--bg);
-      color:var(--text);
-    }
+    /* JSで計算して入れる（ピラミッドが必ず収まる） */
+    --slot: 92px;     /* 丸の外枠サイズ */
+    --ring: 6px;      /* 外枠の太さ */
+    --gap: 16px;      /* 横の間隔 */
+    --rowgap: 18px;   /* 縦の間隔 */
+    --badge: 30px;    /* 順位バッジ直径 */
+    --badgeFont: 13px;
 
-    /* ====== 上部バー ====== */
-    header{
-      position: sticky;
-      top: 0;
-      z-index: 20;
-      background: rgba(255,255,255,.92);
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid var(--line);
-    }
-    .topbar{
-      padding: 12px 12px 10px;
-      max-width: 980px;
-      margin: 0 auto;
-    }
-    h1{margin:0;font-size:20px;line-height:1.2}
-    .by{margin:6px 0 0;font-size:13px;color:var(--muted)}
+    --headerH: 100px; /* 画面上ヘッダー画像の高さ */
+  }
 
-    main{max-width:980px;margin:0 auto;padding:12px;}
+  body{
+    margin:0;
+    font-family: system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    -webkit-text-size-adjust: 100%;
+  }
 
-    .card{
-      background: var(--card);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      overflow: hidden;
-    }
+  header{
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: rgba(255,255,255,.92);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+  .topbar{
+    padding: 12px 12px 10px;
+    max-width: 980px;
+    margin: 0 auto;
+  }
+  h1{margin:0;font-size:20px;line-height:1.2}
+  .by{margin:6px 0 0;font-size:13px;color:var(--muted)}
 
-    /* ====== ヘッダー帯（画面表示） ====== */
-    .banner{
-      height: 110px;
-      position: relative;
-      display:flex;
-      align-items:center;     /* 縦中央 */
-      justify-content:center; /* 横中央 */
-      background:
-        radial-gradient(circle at 20% 30%, rgba(255,120,200,.30), transparent 40%),
-        radial-gradient(circle at 80% 40%, rgba(120,160,255,.28), transparent 45%),
-        linear-gradient(135deg, #ffe7f4, #eef3ff);
-      background-size: cover;
-      background-position: center;
-    }
-    .banner::after{
-      content:"";
-      position:absolute; inset:0;
-      background: linear-gradient(to bottom, rgba(255,255,255,.0), rgba(255,255,255,.35));
-      pointer-events:none;
-    }
-    .bannerTitle{
-      position: relative;
-      font-weight: 800;
-      letter-spacing: .06em;
-      padding: 10px 16px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.78);
-      border: 1px solid rgba(255,255,255,.9);
-      font-size: 14px;
-      color:#111;
-    }
+  main{max-width:980px;margin:0 auto;padding:12px;}
 
-    /* ====== ピラミッド（画面表示） ====== */
-    .pyramidWrap{
-      padding: 12px 12px 10px;
-    }
+  .card{
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
 
-    /* 三角形固定：5列グリッド + 4行 */
-    .pyramidGrid{
-      --d: 112px;        /* 丸の直径（画面用） */
-      --gapX: 18px;
-      --gapY: 20px;
+  /* 上部バナー */
+  .banner{
+    height: var(--headerH);
+    position: relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:
+      radial-gradient(circle at 20% 30%, rgba(255,120,200,.30), transparent 40%),
+      radial-gradient(circle at 80% 40%, rgba(120,160,255,.28), transparent 45%),
+      linear-gradient(135deg, #ffe7f4, #eef3ff);
+  }
+  .banner.hasImage{
+    background-size: cover;
+    background-position: center;
+  }
+  .banner::after{
+    content:"";
+    position:absolute; inset:0;
+    background: linear-gradient(to bottom, rgba(255,255,255,.0), rgba(255,255,255,.35));
+    pointer-events:none;
+  }
+  .bannerTitle{
+    position:absolute;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+    font-weight: 900;
+    letter-spacing: .06em;
+    padding: 9px 14px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.80);
+    border: 1px solid rgba(255,255,255,.90);
+    font-size: 14px;
+    white-space: nowrap;
+  }
 
-      display:grid;
-      grid-template-columns: repeat(5, 1fr);
-      grid-template-rows: repeat(4, auto);
-      gap: var(--gapY) var(--gapX);
-      justify-items: center;
-      align-items: start;
+  /* ピラミッド（11枠：1/2/3/5） */
+  .pyramidWrap{
+    padding: 12px 12px 10px;
+    background: #fff;
+  }
+  .pyramid{
+    width: 100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap: var(--rowgap);
+    padding: 12px 0 6px;
+    box-sizing: border-box;
+  }
+  .row{
+    display:flex;
+    justify-content:center;
+    gap: var(--gap);
+    width: 100%;
+  }
 
-      /* 端が切れにくいように左右余白 */
-      padding: 18px 8px 8px;
-    }
+  .slot{
+    width: var(--slot);
+    text-align:center;
+    position:relative;
+    flex: 0 0 var(--slot);
+  }
 
-    /* iPhoneで11人がはみ出る場合に自動で少し小さく */
-    @media (max-width: 430px){
-      .pyramidGrid{ --d: 100px; --gapX: 14px; --gapY: 18px; }
-    }
-    @media (max-width: 380px){
-      .pyramidGrid{ --d: 94px; --gapX: 12px; --gapY: 16px; }
-    }
+  /* 丸（画像は background-image で表示：長押し保存されにくい） */
+  .avatar{
+    width: var(--slot);
+    height: var(--slot);
+    border-radius: 999px;
+    border: var(--ring) solid #d9d9d9;
+    background: #f6f6f6;
+    box-shadow: 0 10px 22px rgba(0,0,0,.10);
+    position: relative;
+    overflow: visible; /* バッジを絶対に隠さない */
+    margin: 0 auto;
+    box-sizing: border-box;
+  }
+  .avatarImg{
+    position:absolute;
+    left:0; top:0; right:0; bottom:0;
+    border-radius: 999px;
+    background-size: cover;
+    background-position: center;
+    background-repeat:no-repeat;
+  }
 
-    /* スロットの配置（公式形：1 / 2 / 3 / 5） */
-    .pos1  { grid-row:1; grid-column:3; }
-    .pos2  { grid-row:2; grid-column:2; }
-    .pos3  { grid-row:2; grid-column:4; }
-    .pos4  { grid-row:3; grid-column:1; }
-    .pos5  { grid-row:3; grid-column:3; }
-    .pos6  { grid-row:3; grid-column:5; }
-    .pos7  { grid-row:4; grid-column:1; }
-    .pos8  { grid-row:4; grid-column:2; }
-    .pos9  { grid-row:4; grid-column:3; }
-    .pos10 { grid-row:4; grid-column:4; }
-    .pos11 { grid-row:4; grid-column:5; }
+  /* 未選択の＋ */
+  .empty .avatar{
+    background: #e9e9e9;
+    border-color:#dcdcdc;
+    box-shadow:none;
+  }
+  .empty .avatarImg{display:none;}
+  .plus{
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight: 900;
+    font-size: calc(var(--slot) * 0.34);
+    color:#888;
+    user-select:none;
+  }
 
-    /* ここが「長押し保存」を起こしにくくする */
-    .noTouch, .noTouch *{
-      -webkit-user-select: none;
-      user-select: none;
-      -webkit-touch-callout: none;
-    }
+  /* 順位バッジ：丸の「真ん中下」ど真ん中固定 */
+  .rank{
+    position:absolute;
+    left:50%;
+    bottom: calc(-1 * (var(--badge) * 0.46));
+    transform: translateX(-50%);
+    width: var(--badge);
+    height: var(--badge);
+    border-radius: 999px;
+    background: var(--blue);
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight: 900;
+    font-size: var(--badgeFont);
+    border: 3px solid #fff;
+    box-shadow: 0 6px 14px rgba(0,0,0,.16);
+    z-index: 5;
+    line-height: 1;
+    pointer-events:none;
+  }
 
-    .slot{
-      width: calc(var(--d) + 20px);
-      text-align:center;
-    }
+  /* 名前：バッジの下 */
+  .name{
+    margin-top: calc(var(--badge) * 0.70);
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: .01em;
+    color:#111;
+    word-break: keep-all;
+    white-space: normal;
+  }
 
-    /* 画像は img ではなく背景画像（Aの要望） */
-    .avatar{
-      width: var(--d);
-      height: var(--d);
-      border-radius: 999px;
-      border: 8px solid var(--ring);
-      background: #fff;
-      box-shadow: 0 10px 24px rgba(0,0,0,.10);
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      margin: 0 auto;
-      position: relative;
-      overflow: visible; /* バッジがはみ出してもOK */
-    }
+  /* 並び替え：矢印で確実に入れ替え */
+  .reorder{
+    margin-top: 8px;
+    display:flex;
+    justify-content:center;
+    gap: 10px;
+  }
+  .reorder button{
+    width: 44px;
+    height: 32px;
+    border-radius: 999px;
+    border: 1px solid #dadada;
+    background: #fff;
+    font-size: 18px;
+    line-height: 1;
+    color: var(--blue);
+  }
+  .reorder button:active{transform:scale(.98)}
 
-    /* 順位バッジ：丸の真ん中下、完全中央 */
-    .rank{
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      bottom: -18px;
-      width: 44px;
-      height: 44px;
-      border-radius: 999px;
-      background: var(--blue);
-      color:#fff;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-weight: 800;
-      font-size: 16px;
-      border: 4px solid #fff;
-      box-shadow: 0 6px 14px rgba(0,0,0,.16);
-      z-index: 5;
-    }
+  /* 操作ボタン */
+  .actions{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    justify-content:center;
+    padding: 12px 10px 14px;
+  }
+  button{
+    padding: 11px 14px;
+    border-radius: 12px;
+    border: 1px solid #ddd;
+    background: #fff;
+    font-size: 14px;
+  }
+  button:active{transform:scale(.98)}
+  .primary{border-color:#cfe2ff;}
+  .danger{border-color:#ffd6d6;}
 
-    /* 名前は順位の下 */
-    .name{
-      margin-top: 26px; /* バッジ分の余白 */
-      font-size: 13px;
-      font-weight: 700;
-      line-height: 1.15;
-      color:#111;
-      min-height: 34px; /* 段ズレ防止 */
-      padding: 0 2px;
-    }
+  /* 下：検索 + 表示切替 + 一覧 */
+  .listCard{
+    margin-top: 12px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow:hidden;
+  }
+  .listHead{
+    display:flex;
+    align-items:center;
+    gap: 10px;
+    padding: 10px;
+    border-bottom: 1px solid var(--line);
+  }
 
-    /* 未選択は＋ */
-    .empty{
-      opacity: .12;
-      filter: grayscale(1);
-    }
-    .empty .avatar{
-      background-image: none !important;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size: 44px;
-      font-weight: 900;
-      color:#666;
-    }
-    .empty .rank{ display:none; }
-    .empty .name{ display:none; }
+  /* 検索バー（参考画像風） */
+  .searchWrap{
+    flex: 1;
+    display:flex;
+    align-items:center;
+    gap: 8px;
+    background: #efeff0;
+    border: 1px solid #e3e3e3;
+    border-radius: 12px;
+    padding: 10px 10px;
+    box-sizing:border-box;
+  }
+  .searchIcon{
+    width:18px;height:18px;
+    display:flex;align-items:center;justify-content:center;
+    color:#888;
+    user-select:none;
+  }
+  .searchInput{
+    flex:1;
+    border:none;
+    outline:none;
+    background: transparent;
+    font-size: 16px;
+  }
+  .clearBtn{
+    border:none;
+    background: transparent;
+    font-size: 18px;
+    color:#888;
+    padding: 4px 6px;
+    border-radius: 10px;
+  }
+  .clearBtn:active{transform:scale(.98)}
 
-    /* 並び替え（確実：矢印） */
-    .reorder{
-      display:flex;
-      justify-content:center;
-      gap: 10px;
-      margin-top: 6px;
-    }
-    .reorder button{
-      padding: 8px 12px;
-      border-radius: 999px;
-      border: 1px solid #dcdcdc;
-      background: #fff;
-      font-size: 16px;
-      line-height: 1;
-    }
+  /* 表示切替ボタン（右側） */
+  .viewToggles{
+    display:flex;
+    gap: 8px;
+  }
+  .toggle{
+    border: 1px solid #dcdcdc;
+    background:#fff;
+    border-radius: 10px;
+    padding: 9px 10px;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+  .toggle.active{
+    border-color:#cfe2ff;
+    color: var(--blue);
+    font-weight: 800;
+  }
 
-    /* 操作ボタン */
-    .actions{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      justify-content:center;
-      padding: 10px 12px 14px;
-    }
-    button{
-      padding: 11px 12px;
-      border-radius: 12px;
-      border: 1px solid #ddd;
-      background: #fff;
-      font-size: 14px;
-    }
-    button:active{transform:scale(.98)}
-    .primary{border-color:#cfe2ff;}
-    .danger{border-color:#ffd6d6;}
+  /* 一覧枠：中だけスクロール */
+  #membersWrap{
+    max-height: 44vh;
+    overflow:auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 10px;
+    background:#fff;
+  }
 
-    /* ====== 練習生一覧 ====== */
-    .sectionTitle{
-      font-size: 15px;
-      margin: 14px 2px 8px;
-      font-weight: 800;
-    }
+  /* 一覧：グリッド/リスト切替 */
+  #members.grid{
+    display:grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+  }
+  #members.list{
+    display:flex;
+    flex-direction:column;
+    gap: 10px;
+  }
 
-    #membersWrap{
-      background: var(--card);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      padding: 10px;
-      max-height: 40vh;
-      overflow: auto;
-      -webkit-overflow-scrolling: touch;
-      box-shadow: var(--shadow);
-    }
-    #members{
-      display:grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 10px;
-    }
-    @media (max-width:520px){
-      #members{grid-template-columns: repeat(3, minmax(0, 1fr));}
-    }
+  .member{
+    border: 1px solid #efefef;
+    border-radius: 14px;
+    background:#fff;
+    cursor:pointer;
+    user-select:none;
+  }
+  .member:active{transform:scale(.99)}
 
-    .member{
-      background: #fff;
-      border: 1px solid #efefef;
-      border-radius: 14px;
-      padding: 8px 6px;
-      text-align:center;
-      cursor:pointer;
-    }
-    .member img{
-      width:72px;height:72px;object-fit:cover;
-      border-radius: 999px;
-      border: 3px solid #f1f1f1;
-      display:block;margin:0 auto 6px;
-      background:#fff;
-    }
-    .member .mname{
-      font-size: 11px;
-      line-height: 1.2;
-      font-weight: 650;
-    }
-    .member.selected{
-      opacity:.35;
-      filter: grayscale(1);
-      pointer-events:none;
-    }
-    .hint{
-      font-size: 12px;
-      color: var(--muted);
-      margin: 8px 2px 0;
-    }
+  /* グリッドカード */
+  .member.gridCard{
+    padding: 10px 8px;
+    text-align:center;
+  }
+  .thumb{
+    width:72px;height:72px;
+    border-radius:999px;
+    border: 3px solid #f1f1f1;
+    margin: 0 auto 8px;
+    background:#f6f6f6;
+    background-size: cover;
+    background-position:center;
+    background-repeat:no-repeat;
+  }
+  .memberName{
+    font-size:12px;
+    font-weight: 800;
+    line-height: 1.2;
+  }
 
-    /* ====== トースト ====== */
-    .toast{
-      position: fixed;
-      left: 50%;
-      bottom: 18px;
-      transform: translateX(-50%);
-      background: rgba(0,0,0,.78);
-      color:#fff;
-      padding: 10px 12px;
-      border-radius: 999px;
-      font-size: 13px;
-      display:none;
-      z-index:999;
-    }
+  /* リストカード */
+  .member.listRow{
+    display:flex;
+    align-items:center;
+    gap: 10px;
+    padding: 10px;
+  }
+  .thumbSmall{
+    width:52px;height:52px;
+    border-radius:999px;
+    border: 3px solid #f1f1f1;
+    background:#f6f6f6;
+    background-size: cover;
+    background-position:center;
+    background-repeat:no-repeat;
+    flex: 0 0 52px;
+  }
+  .memberNameRow{
+    font-size:14px;
+    font-weight: 900;
+    line-height: 1.2;
+  }
+  .memberSub{
+    margin-top: 4px;
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 700;
+  }
 
-    /* ====== 保存専用（1004×924固定） ======
-       画面には出さない。ここをhtml2canvasで撮る。 */
-    #exportArea{
-      position: fixed;
-      left: -10000px;
-      top: 0;
-      width: 1004px;
-      height: 924px;
-      background: #ffffff;
-      overflow: hidden;
-      box-sizing: border-box;
-    }
-    #exportInner{
-      width: 1004px;
-      height: 924px;
-      background:#fff;
-      position: relative;
-      overflow: hidden;
-    }
+  .member.selected{
+    opacity:.35;
+    filter: grayscale(1);
+    pointer-events:none;
+  }
 
-    .exportBanner{
-      height: 170px;
-      width: 100%;
-      background-size: cover;
-      background-position: center;
-      display:flex;
-      align-items:center;     /* 真ん中 */
-      justify-content:center; /* 真ん中 */
-      position: relative;
-    }
-    .exportBanner::after{
-      content:"";
-      position:absolute; inset:0;
-      background: linear-gradient(to bottom, rgba(255,255,255,.0), rgba(255,255,255,.35));
-      pointer-events:none;
-    }
-    .exportTitlePill{
-      position: relative;
-      font-weight: 900;
-      letter-spacing: .06em;
-      padding: 14px 22px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.80);
-      border: 1px solid rgba(255,255,255,.92);
-      font-size: 22px;
-      color:#111;
-    }
+  .noResult{
+    padding: 16px;
+    text-align:center;
+    color: var(--muted);
+    font-weight: 800;
+  }
 
-    .exportBody{
-      /* フッターと絶対に被らないように、下に余白を確保 */
-      padding: 36px 56px 92px;
-      box-sizing: border-box;
-    }
+  .toast{
+    position: fixed;
+    left: 50%;
+    bottom: 18px;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,.78);
+    color:#fff;
+    padding: 10px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    display:none;
+    z-index:999;
+  }
 
-    .exportGrid{
-      /* 1004幅で5人が絶対に切れないように安全値 */
-      --d: 142px;      /* 丸 */
-      --gapX: 30px;    /* 横間隔 */
-      --gapY: 26px;    /* 縦間隔 */
+  /* 保存専用（画面外）— 1004×924 固定 */
+  #exportArea{
+    position: fixed;
+    left: -20000px;
+    top: 0;
+    width: 1004px;
+    height: 924px;
+    background:#fff;
+    overflow:hidden;
+  }
+  #exportInner{
+    width: 1004px;
+    height: 924px;
+    position:relative;
+    background:#fff;
+  }
+  .exportBanner{
+    height: 150px;
+    background-size: cover;
+    background-position: center;
+    position:relative;
+  }
+  .exportBanner::after{
+    content:"";
+    position:absolute; inset:0;
+    background: linear-gradient(to bottom, rgba(255,255,255,.0), rgba(255,255,255,.30));
+    pointer-events:none;
+  }
+  .exportPill{
+    position:absolute;
+    left:50%;
+    top:50%;
+    transform: translate(-50%,-50%);
+    font-weight: 900;
+    letter-spacing:.06em;
+    padding: 14px 22px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.80);
+    border: 1px solid rgba(255,255,255,.92);
+    font-size: 22px;
+    color:#111;
+    white-space: nowrap;
+  }
+  .exportBody{
+    padding: 28px 72px 0;
+    box-sizing:border-box;
+  }
+  .exportPyramid{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap: 34px;
+    padding-top: 10px;
+  }
+  .exportRow{
+    display:flex;
+    justify-content:center;
+    gap: 40px; /* 端切れしないように固定 */
+    width:100%;
+  }
+  .exportSlot{
+    width: 140px;
+    text-align:center;
+    position:relative;
+    flex: 0 0 140px;
+  }
+  .exportAvatar{
+    width:140px;height:140px;
+    border-radius:999px;
+    border: 10px solid #d9d9d9;
+    background:#f6f6f6;
+    position:relative;
+    margin: 0 auto;
+    box-shadow: 0 10px 24px rgba(0,0,0,.12);
+    overflow: visible;
+    box-sizing:border-box;
+  }
+  .exportAvatarImg{
+    position:absolute; inset:0;
+    border-radius:999px;
+    background-size: cover;           /* 顔つぶれゼロ */
+    background-position:center;
+    background-repeat:no-repeat;
+  }
+  .exportPlus{
+    position:absolute; inset:0;
+    display:flex;align-items:center;justify-content:center;
+    font-size: 54px;
+    font-weight: 900;
+    color:#888;
+    user-select:none;
+  }
+  .exportRank{
+    position:absolute;
+    left:50%;
+    bottom: -22px;
+    transform: translateX(-50%);
+    width: 44px;
+    height: 44px;
+    border-radius:999px;
+    background: var(--blue);
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight: 900;
+    font-size: 18px;
+    border: 4px solid #fff;
+    box-shadow: 0 6px 14px rgba(0,0,0,.14);
+    z-index:5;
+    line-height:1;
+  }
+  .exportName{
+    margin-top: 28px; /* バッジ分の余白を確保（被り防止） */
+    font-size: 16px;
+    font-weight: 900;
+    line-height: 1.2;
+    color:#111;
+    white-space: normal;
+    word-break: keep-all;
+  }
+  .exportEmpty{
+    opacity:.14;
+    filter: grayscale(1);
+  }
+  .exportFooter{
+    position:absolute;
+    left:0; right:0;
+    bottom: 18px;
+    text-align:center;
+    font-size: 16px;
+    color:#666;
+    font-weight: 800;
+  }
 
-      display:grid;
-      grid-template-columns: repeat(5, 1fr);
-      grid-template-rows: repeat(4, auto);
-      gap: var(--gapY) var(--gapX);
-      justify-items: center;
-      align-items: start;
-      padding-top: 10px;
-    }
-
-    .exportSlot{
-      width: calc(var(--d) + 24px);
-      text-align:center;
-    }
-
-    .exportAvatar{
-      width: var(--d);
-      height: var(--d);
-      border-radius: 999px;
-      border: 10px solid var(--ring);
-      background:#fff;
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      box-shadow: 0 10px 24px rgba(0,0,0,.12);
-      margin: 0 auto;
-      position: relative;
-      overflow: visible;
-    }
-
-    .exportRank{
-      position:absolute;
-      left:50%;
-      transform:translateX(-50%);
-      bottom:-20px;
-      width: 52px;
-      height: 52px;
-      border-radius: 999px;
-      background: var(--blue);
-      color:#fff;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-weight:900;
-      font-size: 20px;
-      border: 4px solid #fff;
-      box-shadow: 0 6px 14px rgba(0,0,0,.16);
-      z-index: 5;
-    }
-
-    .exportName{
-      margin-top: 30px;
-      font-size: 18px;
-      font-weight: 800;
-      line-height: 1.15;
-      min-height: 44px;
-      color:#111;
-    }
-
-    .exportEmpty{
-      opacity: .10;
-      filter: grayscale(1);
-    }
-    .exportEmpty .exportAvatar{
-      background-image: none !important;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size: 58px;
-      font-weight: 900;
-      color:#666;
-    }
-    .exportEmpty .exportRank{ display:none; }
-    .exportEmpty .exportName{ display:none; }
-
-    .exportFooter{
-      position:absolute;
-      left:0; right:0;
-      bottom: 26px;
-      text-align:center;
-      font-size: 18px;
-      color:#666;
-      font-weight: 650;
-    }
-  </style>
+  /* できるだけ長押し保存しにくくする（完全防止は不可） */
+  *{-webkit-touch-callout: none;}
+</style>
 </head>
 
 <body>
@@ -466,15 +567,15 @@
 </header>
 
 <main>
-  <!-- 画面表示 -->
+
+  <!-- 上：ピラミッド -->
   <div class="card">
     <div id="banner" class="banner">
       <div class="bannerTitle">AUDITION PICK • YOUR TOP 11</div>
     </div>
 
-    <!-- ピラミッド（A：ここだけ背景画像化＆長押し保存起きにくく） -->
     <div class="pyramidWrap">
-      <div id="pyramid" class="pyramidGrid noTouch"></div>
+      <div class="pyramid" id="pyramid"></div>
     </div>
 
     <div class="actions">
@@ -484,11 +585,27 @@
     </div>
   </div>
 
-  <div class="sectionTitle">練習生一覧（押して追加）</div>
-  <div id="membersWrap">
-    <div id="members"></div>
-    <div class="hint">※一覧はこの枠の中だけスクロールできます（最大11人まで）</div>
+  <!-- 下：検索＋表示切替＋一覧 -->
+  <div class="listCard">
+    <div class="listHead">
+      <div class="searchWrap">
+        <div class="searchIcon">🔍</div>
+        <input id="search" class="searchInput" type="text" placeholder="Search" autocomplete="off" />
+        <button id="clear" class="clearBtn" aria-label="clear" title="clear">×</button>
+      </div>
+
+      <div class="viewToggles">
+        <button id="btnList" class="toggle" onclick="setView('list')">1列</button>
+        <button id="btnGrid" class="toggle active" onclick="setView('grid')">3列</button>
+      </div>
+    </div>
+
+    <div id="membersWrap">
+      <div id="members" class="grid"></div>
+      <div id="noResult" class="noResult" style="display:none;">該当なし</div>
+    </div>
   </div>
+
 </main>
 
 <div class="toast" id="toast">画像を生成中…</div>
@@ -497,13 +614,11 @@
 <div id="exportArea" aria-hidden="true">
   <div id="exportInner">
     <div id="exportBanner" class="exportBanner">
-      <div class="exportTitlePill">AUDITION PICK • YOUR TOP 11</div>
+      <div class="exportPill">AUDITION PICK • YOUR TOP 11</div>
     </div>
-
     <div class="exportBody">
-      <div id="exportPyramid" class="exportGrid"></div>
+      <div class="exportPyramid" id="exportPyramid"></div>
     </div>
-
     <div class="exportFooter">created by @12agassi</div>
   </div>
 </div>
@@ -512,228 +627,355 @@
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
 <script>
-/* ===== 設定 ===== */
+/* =========================
+   設定
+========================= */
+
+/* ヘッダー画像（あなたの画像） */
 const HEADER_IMAGE_URL = "https://i.imgur.com/nYBRUdd.png";
 
-/* 練習生データ（ここに追加していく） */
-const trainees = [
-  // 既存5人
-  {name:"アダム・ナガイ(ADAM)",img:"https://i.imgur.com/6QGzvRx.png"},
-  {name:"中丸 晏寿(AJU)",img:"https://i.imgur.com/KiZCKos.png"},
-  {name:"オム・スアンカワーテン(AOM)",img:"https://i.imgur.com/dDIFJSc.png"},
-  {name:"アーチャー・ウイ(ARCHER)",img:"https://i.imgur.com/5iIerqN.png"},
-  {name:"篠ヶ谷 歩夢(S.AYUMU)",img:"https://i.imgur.com/YJAdh8q.png"},
+/* ピラミッドの形（11枠） */
+const rowSizes = [1,2,3,5];
+const MAX = 11;
 
-  // 追加7人
-  {name:"小林 千悟(CHISATO)",img:"https://i.imgur.com/Iu0hNBO.png"},
-  {name:"加藤 大樹(K.DAIKI)",img:"https://i.imgur.com/4fRk2EB.png"},
-  {name:"カク・ドンミン(DONGMIN)",img:"https://i.imgur.com/xZSQqMh.png"},
-  {name:"末川 瑛太(EITA)",img:"https://i.imgur.com/alEjKCP.png"},
-  {name:"保里 瑛都(H.EITO)",img:"https://i.imgur.com/IAhs4ZA.png"},
-  {name:"金田 栄都(K.EITO)",img:"https://i.imgur.com/tF7i1du.png"},
-  {name:"櫻井 楓真(FUMA)",img:"https://i.imgur.com/WIWI8Sx.png"}
+/* 保存キー */
+const STORAGE_KEY = "oshimaker_final_v1";
+
+/* 練習生データ（追加済み：あなたが送ってくれた分） */
+const trainees = [
+  {name:"アダム・ナガイ(ADAM)", img:"https://i.imgur.com/6QGzvRx.png"},
+  {name:"中丸 晏寿(AJU)", img:"https://i.imgur.com/KiZCKos.png"},
+  {name:"オム・スアンカワーテン(AOM)", img:"https://i.imgur.com/dDIFJSc.png"},
+  {name:"アーチャー・ウイ(ARCHER)", img:"https://i.imgur.com/5iIerqN.png"},
+  {name:"篠ヶ谷 歩夢(S.AYUMU)", img:"https://i.imgur.com/YJAdh8q.png"},
+
+  {name:"小林 千悟(CHISATO)", img:"https://i.imgur.com/Iu0hNBO.png"},
+  {name:"加藤 大樹(K.DAIKI)", img:"https://i.imgur.com/4fRk2EB.png"},
+  {name:"カク・ドンミン(DONGMIN)", img:"https://i.imgur.com/xZSQqMh.png"},
+  {name:"末川 瑛太(EITA)", img:"https://i.imgur.com/alEjKCP.png"},
+  {name:"保里 瑛都(H.EITO)", img:"https://i.imgur.com/IAhs4ZA.png"},
+  {name:"金田 栄都(K.EITO)", img:"https://i.imgur.com/tF7i1du.png"},
+  {name:"櫻井 楓真(FUMA)", img:"https://i.imgur.com/WIWI8Sx.png"}
 ];
 
-const MAX_PICK = 11;
-const STORAGE_KEY = "oshimaker_selected_vFinal";
+/* =========================
+   便利関数（名前表示/検索）
+========================= */
+function displayJPName(full){
+  // ()の前だけ表示（日本語だけ）
+  const idx = full.indexOf("(");
+  return (idx >= 0 ? full.slice(0, idx) : full).trim();
+}
+function codeInParen(full){
+  // ()内だけ（英字など）
+  const m = full.match(/\(([^)]+)\)/);
+  return m ? m[1].trim() : "";
+}
+function normalize(s){
+  return (s || "")
+    .toLowerCase()
+    .replace(/\s+/g,"")
+    .replace(/[().・\-＿_]/g,"");
+}
 
-/* 11枠の位置クラス（公式の三角形） */
-const posClasses = ["pos1","pos2","pos3","pos4","pos5","pos6","pos7","pos8","pos9","pos10","pos11"];
+/* =========================
+   状態
+========================= */
+let selected = loadSelected();     // traineesのindex配列（最大11）
+let viewMode = loadViewMode();     // 'grid' or 'list'
+let query = "";
 
-/* 選択状態（traineesのindex配列） */
-let selected = loadSelected();
-
-/* ===== ヘッダー反映（画面＆保存） ===== */
+/* =========================
+   初期：ヘッダー背景
+========================= */
 (function setupBanners(){
   const banner = document.getElementById("banner");
   const exportBanner = document.getElementById("exportBanner");
   if(HEADER_IMAGE_URL){
+    banner.classList.add("hasImage");
     banner.style.backgroundImage = `url('${HEADER_IMAGE_URL}')`;
     exportBanner.style.backgroundImage = `url('${HEADER_IMAGE_URL}')`;
   }
 })();
 
-/* ===== iOS「長押し保存」起きにくく（ピラミッドだけ） ===== */
-(function preventLongPressOnPyramid(){
-  const pyramid = document.getElementById("pyramid");
-  pyramid.addEventListener("contextmenu", (e)=>e.preventDefault(), {passive:false});
-  pyramid.addEventListener("dragstart", (e)=>e.preventDefault(), {passive:false});
-  // iOSの長押しで出るメニュー対策（完全禁止は不可だがかなり抑制）
-  pyramid.addEventListener("touchstart", ()=>{}, {passive:true});
-})();
+/* =========================
+   ピラミッドが必ず画面内に収まるサイズ計算
+========================= */
+function updatePyramidSizes(){
+  const card = document.querySelector(".card");
+  if(!card) return;
 
-/* ===== 名前の()英字を消す ===== */
-function cleanName(full){
-  // 半角() / 全角（）の中身を消す
-  return full
-    .replace(/\s*\(.*?\)\s*/g, "")
-    .replace(/\s*（.*?）\s*/g, "")
-    .trim();
-}
+  // ピラミッドエリアの実質幅（余白ぶん引く）
+  const wrap = document.querySelector(".pyramidWrap");
+  const w = wrap ? wrap.clientWidth : card.clientWidth;
 
-/* ===== 一覧描画 ===== */
-function drawMembers(){
-  const membersEl = document.getElementById("members");
-  membersEl.innerHTML = "";
-  trainees.forEach((m,i)=>{
-    const div = document.createElement("div");
-    div.className = "member";
-    if(selected.includes(i)) div.classList.add("selected");
-    div.innerHTML = `<img src="${m.img}" alt=""><div class="mname">${cleanName(m.name)}</div>`;
-    div.addEventListener("click", ()=>add(i));
-    membersEl.appendChild(div);
-  });
-}
+  // 端切れしないように 5個並ぶ行の幅から slot を逆算
+  const paddingX = 24; // 目安（wrapの左右余白）
+  const maxRow = 5;
 
-/* ===== 追加 ===== */
-function add(i){
-  if(selected.length >= MAX_PICK){
-    alert("11人まで！");
-    return;
-  }
-  if(selected.includes(i)) return;
-  selected.push(i);
-  saveSelected();
-  drawMembers();
-  drawPyramid();
-  drawExportPyramid();
+  // gapは小さすぎると詰まるので clamp
+  const gap = Math.max(10, Math.min(18, Math.floor(w * 0.035)));
+  const available = Math.max(260, w - paddingX);
+  const slot = Math.floor((available - gap * (maxRow - 1)) / maxRow);
+
+  // iPhoneで全部見えるように上限/下限を設定
+  const finalSlot = Math.max(62, Math.min(98, slot));
+  const ring = Math.max(4, Math.round(finalSlot * 0.065));
+  const rowgap = Math.max(14, Math.round(finalSlot * 0.20));
+  const badge = Math.max(24, Math.round(finalSlot * 0.34));
+  const badgeFont = Math.max(12, Math.round(badge * 0.45));
+
+  document.documentElement.style.setProperty("--slot", finalSlot + "px");
+  document.documentElement.style.setProperty("--ring", ring + "px");
+  document.documentElement.style.setProperty("--gap", gap + "px");
+  document.documentElement.style.setProperty("--rowgap", rowgap + "px");
+  document.documentElement.style.setProperty("--badge", badge + "px");
+  document.documentElement.style.setProperty("--badgeFont", badgeFont + "px");
+
+  // ヘッダーの高さも端末で微調整（邪魔にならない）
+  const headerH = Math.max(84, Math.min(110, Math.round(finalSlot * 1.05)));
+  document.documentElement.style.setProperty("--headerH", headerH + "px");
 }
 
-/* ===== 並び替え（確実：矢印で隣と入れ替え） ===== */
-function moveLeft(pos){
-  if(pos <= 0) return;
-  const t = selected[pos-1];
-  selected[pos-1] = selected[pos];
-  selected[pos] = t;
-  saveSelected();
-  drawMembers();
-  drawPyramid();
-  drawExportPyramid();
-}
-function moveRight(pos){
-  if(pos >= selected.length-1) return;
-  const t = selected[pos+1];
-  selected[pos+1] = selected[pos];
-  selected[pos] = t;
-  saveSelected();
-  drawMembers();
-  drawPyramid();
-  drawExportPyramid();
-}
-
-/* ===== 1人戻す ===== */
-function undo(){
-  selected.pop();
-  saveSelected();
-  drawMembers();
-  drawPyramid();
-  drawExportPyramid();
-}
-
-/* ===== リセット ===== */
-function resetAll(){
-  selected = [];
-  saveSelected();
-  drawMembers();
-  drawPyramid();
-  drawExportPyramid();
-}
-
-/* ===== ローカル保存 ===== */
-function saveSelected(){
-  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(selected)); }catch(e){}
-}
-function loadSelected(){
-  try{
-    const raw = localStorage.getItem(STORAGE_KEY);
-    const arr = raw ? JSON.parse(raw) : [];
-    return Array.isArray(arr) ? arr.filter(n=>Number.isInteger(n)) : [];
-  }catch(e){
-    return [];
-  }
-}
-
-/* ===== ピラミッド描画（画面表示） =====
-   ・背景画像で表示（Aの要望）
-   ・未選択は＋
-   ・三角形固定（gridのposクラスで配置） */
+/* =========================
+   ピラミッド描画
+========================= */
 function drawPyramid(){
   const p = document.getElementById("pyramid");
   p.innerHTML = "";
 
-  for(let rank=1; rank<=11; rank++){
-    const slot = document.createElement("div");
-    slot.className = `slot ${posClasses[rank-1]}`;
+  let rank = 1;
 
-    if(rank <= selected.length){
-      const idx = selected[rank-1];
-      const m = trainees[idx];
+  rowSizes.forEach((size)=>{
+    const row = document.createElement("div");
+    row.className = "row";
 
-      // avatarは背景画像
-      slot.innerHTML = `
-        <div class="avatar" style="background-image:url('${m.img}')">
-          <div class="rank">${rank}</div>
-        </div>
-        <div class="name">${cleanName(m.name)}</div>
-        <div class="reorder">
-          <button onclick="moveLeft(${rank-1})" aria-label="left">←</button>
-          <button onclick="moveRight(${rank-1})" aria-label="right">→</button>
-        </div>
-      `;
-    }else{
-      slot.classList.add("empty");
-      slot.innerHTML = `
-        <div class="avatar">+</div>
-        <div class="name"></div>
-      `;
+    for(let k=0; k<size; k++){
+      const slot = document.createElement("div");
+      slot.className = "slot";
+
+      if(rank <= selected.length){
+        const tIndex = selected[rank-1];
+        const m = trainees[tIndex];
+
+        slot.innerHTML = `
+          <div class="avatar">
+            <div class="avatarImg" style="background-image:url('${m.img}')"></div>
+            <div class="rank">${rank}</div>
+          </div>
+          <div class="name">${escapeHtml(displayJPName(m.name))}</div>
+          <div class="reorder">
+            <button onclick="moveLeft(${rank-1})" aria-label="left">←</button>
+            <button onclick="moveRight(${rank-1})" aria-label="right">→</button>
+          </div>
+        `;
+      } else {
+        slot.classList.add("empty");
+        slot.innerHTML = `
+          <div class="avatar">
+            <div class="plus">＋</div>
+            <div class="rank">${rank}</div>
+          </div>
+          <div class="name"></div>
+          <div class="reorder" style="visibility:hidden;">
+            <button>←</button><button>→</button>
+          </div>
+        `;
+      }
+
+      row.appendChild(slot);
+      rank++;
     }
 
-    p.appendChild(slot);
-  }
+    p.appendChild(row);
+  });
 }
 
-/* ===== ピラミッド描画（保存用 1004×924） =====
-   ・被りなし（下に余白）
-   ・端切れしない（安全サイズ）
-   ・順位は真ん中下 */
+/* =========================
+   保存用（1004×924）ピラミッド描画
+========================= */
 function drawExportPyramid(){
   const p = document.getElementById("exportPyramid");
   p.innerHTML = "";
 
-  for(let rank=1; rank<=11; rank++){
-    const slot = document.createElement("div");
-    slot.className = `exportSlot ${posClasses[rank-1]}`;
+  let rank = 1;
 
-    if(rank <= selected.length){
-      const idx = selected[rank-1];
-      const m = trainees[idx];
+  rowSizes.forEach((size)=>{
+    const row = document.createElement("div");
+    row.className = "exportRow";
 
-      slot.innerHTML = `
-        <div class="exportAvatar" style="background-image:url('${m.img}')">
-          <div class="exportRank">${rank}</div>
-        </div>
-        <div class="exportName">${cleanName(m.name)}</div>
+    for(let k=0;k<size;k++){
+      const slot = document.createElement("div");
+      slot.className = "exportSlot";
+
+      if(rank <= selected.length){
+        const m = trainees[selected[rank-1]];
+        slot.innerHTML = `
+          <div class="exportAvatar">
+            <div class="exportAvatarImg" style="background-image:url('${m.img}')"></div>
+            <div class="exportRank">${rank}</div>
+          </div>
+          <div class="exportName">${escapeHtml(displayJPName(m.name))}</div>
+        `;
+      } else {
+        slot.classList.add("exportEmpty");
+        slot.innerHTML = `
+          <div class="exportAvatar">
+            <div class="exportPlus">＋</div>
+            <div class="exportRank">${rank}</div>
+          </div>
+          <div class="exportName"></div>
+        `;
+      }
+
+      row.appendChild(slot);
+      rank++;
+    }
+    p.appendChild(row);
+  });
+}
+
+/* =========================
+   一覧：検索 + 表示切替
+========================= */
+function setView(mode){
+  viewMode = mode;
+  saveViewMode();
+  applyViewButtons();
+  drawMembers();
+}
+function applyViewButtons(){
+  document.getElementById("btnList").classList.toggle("active", viewMode === "list");
+  document.getElementById("btnGrid").classList.toggle("active", viewMode === "grid");
+  const members = document.getElementById("members");
+  members.className = viewMode;
+}
+
+function getFilteredIndexes(){
+  const q = normalize(query);
+  if(!q) return trainees.map((_,i)=>i);
+
+  const result = [];
+  for(let i=0;i<trainees.length;i++){
+    const full = trainees[i].name;
+    const jp = displayJPName(full);
+    const code = codeInParen(full);
+
+    const key = normalize(full) + " " + normalize(jp) + " " + normalize(code);
+    if(key.includes(q)) result.push(i);
+  }
+  return result;
+}
+
+function drawMembers(){
+  const members = document.getElementById("members");
+  const noResult = document.getElementById("noResult");
+  members.innerHTML = "";
+
+  const indexes = getFilteredIndexes();
+
+  if(indexes.length === 0){
+    noResult.style.display = "block";
+    return;
+  }
+  noResult.style.display = "none";
+
+  indexes.forEach((i)=>{
+    const m = trainees[i];
+    const chosen = selected.includes(i);
+
+    const card = document.createElement("div");
+    card.className = "member " + (viewMode === "grid" ? "gridCard" : "listRow");
+    if(chosen) card.classList.add("selected");
+
+    const jpName = displayJPName(m.name);
+    const code = codeInParen(m.name);
+
+    if(viewMode === "grid"){
+      card.innerHTML = `
+        <div class="thumb" style="background-image:url('${m.img}')"></div>
+        <div class="memberName">${escapeHtml(jpName)}</div>
       `;
     }else{
-      slot.classList.add("exportEmpty");
-      slot.innerHTML = `
-        <div class="exportAvatar">+</div>
-        <div class="exportName"></div>
+      card.innerHTML = `
+        <div class="thumbSmall" style="background-image:url('${m.img}')"></div>
+        <div>
+          <div class="memberNameRow">${escapeHtml(jpName)}</div>
+          <div class="memberSub">${escapeHtml(code ? "(" + code + ")" : "")}</div>
+        </div>
       `;
     }
 
-    p.appendChild(slot);
-  }
+    card.addEventListener("click", ()=>addMember(i));
+    members.appendChild(card);
+  });
 }
 
-/* ===== 画像として保存（1004×924固定） ===== */
+/* =========================
+   追加 / 戻す / リセット / 並び替え
+========================= */
+function addMember(i){
+  if(selected.length >= MAX){
+    alert("11人まで！");
+    return;
+  }
+  if(selected.includes(i)) return;
+
+  selected.push(i);
+  saveSelected();
+
+  drawPyramid();
+  drawExportPyramid();
+  drawMembers();
+}
+
+function undo(){
+  selected.pop();
+  saveSelected();
+  drawPyramid();
+  drawExportPyramid();
+  drawMembers();
+}
+
+function resetAll(){
+  selected = [];
+  saveSelected();
+  drawPyramid();
+  drawExportPyramid();
+  drawMembers();
+}
+
+function moveLeft(pos){
+  if(pos <= 0) return;
+  const tmp = selected[pos-1];
+  selected[pos-1] = selected[pos];
+  selected[pos] = tmp;
+  saveSelected();
+  drawPyramid();
+  drawExportPyramid();
+  drawMembers();
+}
+function moveRight(pos){
+  if(pos >= selected.length-1) return;
+  const tmp = selected[pos+1];
+  selected[pos+1] = selected[pos];
+  selected[pos] = tmp;
+  saveSelected();
+  drawPyramid();
+  drawExportPyramid();
+  drawMembers();
+}
+
+/* =========================
+   保存（1004×924 固定）
+========================= */
 async function saveImage(){
   if(typeof html2canvas === "undefined"){
     alert("画像保存ライブラリの読み込みに失敗しました。");
     return;
   }
 
-  // 保存用を最新化
+  // 最新状態にしてから保存
   drawExportPyramid();
 
   const toast = document.getElementById("toast");
@@ -741,32 +983,101 @@ async function saveImage(){
 
   try{
     const target = document.getElementById("exportInner");
-
     const canvas = await html2canvas(target, {
       backgroundColor: "#ffffff",
       useCORS: true,
       allowTaint: false,
-      scale: 2  // 高画質
+      scale: 2
     });
-
-    // 念のためサイズ確認（1004×924 * scale）
-    // console.log(canvas.width, canvas.height);
 
     const link = document.createElement("a");
     link.download = "oshimaker_1004x924.png";
     link.href = canvas.toDataURL("image/png");
     link.click();
   }catch(e){
-    alert("画像生成に失敗しました（画像URL側の制限の可能性あり）。");
+    alert("画像生成に失敗しました（画像URL側の制限の可能性）。");
   }finally{
     toast.style.display = "none";
   }
 }
 
-/* ===== 初期描画 ===== */
-drawMembers();
-drawPyramid();
-drawExportPyramid();
+/* =========================
+   永続化
+========================= */
+function saveSelected(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(selected)); }catch(e){}
+}
+function loadSelected(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    const arr = raw ? JSON.parse(raw) : [];
+    return Array.isArray(arr) ? arr.filter(n=>Number.isInteger(n)).slice(0, MAX) : [];
+  }catch(e){
+    return [];
+  }
+}
+function saveViewMode(){
+  try{ localStorage.setItem("oshimaker_viewMode", viewMode); }catch(e){}
+}
+function loadViewMode(){
+  try{
+    const v = localStorage.getItem("oshimaker_viewMode");
+    return (v === "list" || v === "grid") ? v : "grid";
+  }catch(e){
+    return "grid";
+  }
+}
+
+/* =========================
+   検索入力
+========================= */
+const searchEl = document.getElementById("search");
+const clearEl = document.getElementById("clear");
+
+searchEl.addEventListener("input", ()=>{
+  query = searchEl.value || "";
+  drawMembers();
+});
+clearEl.addEventListener("click", ()=>{
+  searchEl.value = "";
+  query = "";
+  drawMembers();
+  searchEl.focus();
+});
+
+/* =========================
+   右クリック/ドラッグ保存などを抑制（完全防止は不可）
+========================= */
+document.addEventListener("contextmenu", (e)=> e.preventDefault(), {passive:false});
+document.addEventListener("dragstart", (e)=> e.preventDefault(), {passive:false});
+
+/* =========================
+   XSS対策（名前表示用）
+========================= */
+function escapeHtml(str){
+  return (str||"").replace(/[&<>"']/g, (m)=>({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  }[m]));
+}
+
+/* =========================
+   初期描画
+========================= */
+function boot(){
+  updatePyramidSizes();
+  applyViewButtons();
+  drawPyramid();
+  drawExportPyramid();
+  drawMembers();
+}
+
+window.addEventListener("resize", ()=>{
+  updatePyramidSizes();
+  drawPyramid(); // サイズ変更でズレ防止
+});
+
+boot();
 </script>
+
 </body>
 </html>
