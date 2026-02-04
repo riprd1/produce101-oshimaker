@@ -144,6 +144,7 @@
     justify-content:center;
     gap: 12px;
   }
+
   .picked{
     width: 92px;
     text-align:center;
@@ -184,16 +185,21 @@
     border: 2px solid #fff;
     box-shadow: 0 4px 10px rgba(0,0,0,.12);
   }
-  .picked.swapOn{
-    outline: 3px solid rgba(26,115,232,.45);
-    border-radius: 16px;
-    padding: 2px;
+
+  /* 空枠（＋） */
+  .empty{
+    opacity:.18;
+    filter: grayscale(1);
   }
-  .picked.swapPick{
-    outline: 4px solid rgba(26,115,232,.85);
-    border-radius: 16px;
-    padding: 2px;
+  .empty .avatar{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:900;
+    font-size:34px;
+    color:#555;
   }
+  .empty .name{visibility:hidden;}
 
   /* ボタン */
   .actions{
@@ -263,12 +269,13 @@
 
     <div class="actions">
       <button class="primary" onclick="saveImage()">画像として保存</button>
-      <button id="swapBtn" class="" onclick="toggleSwapMode()">並び替えモード</button>
+      <button id="swapBtn" onclick="toggleSwapMode()">並び替えモード</button>
       <button onclick="undo()">1人戻す</button>
       <button class="danger" onclick="resetAll()">リセット</button>
     </div>
     <p class="note">
-      ※最大11人まで（12人目は追加できません）／長押しで削除できます／並び替えモード中は「2回タップで入れ替え」
+      ※最大11人まで（12人目は追加できません）／長押しで削除できます／並び替えモード中は「2回タップで入れ替え」<br>
+      ★ 形は常に <b>1 / 2 / 3 / 5</b> で固定（空きは「＋」で表示）
     </p>
   </div>
 
@@ -285,10 +292,10 @@
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
 <script>
-/* ✅ あなたのヘッダー画像（入れてある） */
+/* ✅ ヘッダー画像 */
 const HEADER_IMAGE_URL = "https://i.imgur.com/nYBRUdd.png";
 
-/* 練習生データ（今は5人。増やすときはここに追加） */
+/* 練習生（増やすときはここに追加） */
 const trainees=[
   {name:"アダム・ナガイ(ADAM)",img:"https://i.imgur.com/6QGzvRx.png"},
   {name:"中丸 晏寿(AJU)",img:"https://i.imgur.com/KiZCKos.png"},
@@ -298,12 +305,11 @@ const trainees=[
 ];
 
 const rowSizes = [1,2,3,5];
-const STORAGE_KEY = "oshimaker_selected_v2";
+const STORAGE_KEY = "oshimaker_selected_v3";
 
-/* selected は trainees の index 配列 */
 let selected = loadSelected();
 
-/* 並び替えモード */
+/* 並び替え */
 let swapMode = false;
 let swapPickIndex = null;
 
@@ -340,66 +346,71 @@ function add(i){
   drawPyramid();
 }
 
-/* ピラミッド描画 */
+/* ★固定ピラミッド：常に 1/2/3/5 を作る（空枠も表示） */
 function drawPyramid(){
   const p=document.getElementById("pyramid");
   p.innerHTML="";
 
   let idx=0;
+
   rowSizes.forEach((size)=>{
     const row=document.createElement("div");
     row.className="row";
 
     for(let k=0;k<size;k++){
-      if(idx>=selected.length) break;
+      const slot=document.createElement("div");
+      slot.className="picked";
 
-      const traineeIndex = selected[idx];
-      const m = trainees[traineeIndex];
+      // 選択済みがあるなら表示、なければ「＋」の空枠
+      if(idx < selected.length){
+        const traineeIndex = selected[idx];
+        const m = trainees[traineeIndex];
 
-      const card=document.createElement("div");
-      card.className="picked";
-      if(swapMode) card.classList.add("swapOn");
-      if(swapPickIndex === idx) card.classList.add("swapPick");
+        slot.innerHTML = `
+          <div class="rank">${idx+1}</div>
+          <div class="avatar"><img src="${m.img}" alt=""></div>
+          <div class="name">${m.name}</div>
+        `;
 
-      card.dataset.pos = String(idx);
-      card.draggable = true; // PCなどでD&D可の環境向け
+        // 並び替えモード：タップで入替（iPhone向け）
+        slot.addEventListener("click", ()=>onPickedClick(idx));
 
-      card.innerHTML = `
-        <div class="rank">${idx+1}</div>
-        <div class="avatar"><img src="${m.img}" alt=""></div>
-        <div class="name">${m.name}</div>
-      `;
+        // 長押し削除（0.5秒）
+        attachLongPressDelete(slot, idx);
 
-      // タップ操作（並び替え or 通常）
-      card.addEventListener("click", (e)=>onPickedClick(idx));
+        // 並び替えの見た目
+        if(swapMode) slot.classList.add("modeOn");
+        if(swapPickIndex === idx) slot.style.outline = "4px solid rgba(26,115,232,.55)";
+      }else{
+        slot.classList.add("empty");
+        slot.innerHTML = `
+          <div class="avatar">+</div>
+          <div class="name">empty</div>
+        `;
+      }
 
-      // 長押し削除（500ms）
-      attachLongPressDelete(card, idx);
-
-      // ドラッグ&ドロップ（対応環境のみ）
-      attachDragDrop(card, idx);
-
-      row.appendChild(card);
+      row.appendChild(slot);
       idx++;
     }
+
     p.appendChild(row);
   });
 }
 
-/* 長押しで削除 */
+/* 長押し削除 */
 function attachLongPressDelete(el, pos){
-  let timer = null;
-  const start = (ev)=>{
-    if(swapMode) return; // 並び替え中は長押し無効（誤操作防止）
+  let timer=null;
+
+  const start=()=>{
+    if(swapMode) return;
     clearTimeout(timer);
-    timer = setTimeout(()=>{
-      removeAt(pos);
-    }, 500);
+    timer=setTimeout(()=>removeAt(pos), 500);
   };
-  const cancel = ()=>{
+  const cancel=()=>{
     clearTimeout(timer);
-    timer = null;
+    timer=null;
   };
+
   el.addEventListener("touchstart", start, {passive:true});
   el.addEventListener("touchend", cancel, {passive:true});
   el.addEventListener("touchmove", cancel, {passive:true});
@@ -412,7 +423,7 @@ function attachLongPressDelete(el, pos){
 function removeAt(pos){
   if(pos<0 || pos>=selected.length) return;
   selected.splice(pos,1);
-  swapPickIndex = null;
+  swapPickIndex=null;
   saveSelected();
   drawMembers();
   drawPyramid();
@@ -422,13 +433,13 @@ function removeAt(pos){
 function toggleSwapMode(){
   swapMode = !swapMode;
   swapPickIndex = null;
-  const btn = document.getElementById("swapBtn");
+  const btn=document.getElementById("swapBtn");
   btn.classList.toggle("modeOn", swapMode);
   btn.textContent = swapMode ? "並び替え中（タップで入替）" : "並び替えモード";
   drawPyramid();
 }
 
-/* 並び替え：タップで2つ選んで入替（iPhoneで確実） */
+/* 並び替え：2回タップで入替 */
 function onPickedClick(pos){
   if(!swapMode) return;
 
@@ -443,7 +454,6 @@ function onPickedClick(pos){
     return;
   }
 
-  // swap
   const tmp = selected[swapPickIndex];
   selected[swapPickIndex] = selected[pos];
   selected[pos] = tmp;
@@ -454,42 +464,10 @@ function onPickedClick(pos){
   drawPyramid();
 }
 
-/* ドラッグ&ドロップ（対応環境向け） */
-function attachDragDrop(el, pos){
-  let dragFrom = null;
-
-  el.addEventListener("dragstart", (e)=>{
-    if(!swapMode) return e.preventDefault();
-    dragFrom = pos;
-    e.dataTransfer.setData("text/plain", String(pos));
-  });
-
-  el.addEventListener("dragover", (e)=>{
-    if(!swapMode) return;
-    e.preventDefault();
-  });
-
-  el.addEventListener("drop", (e)=>{
-    if(!swapMode) return;
-    e.preventDefault();
-    const from = Number(e.dataTransfer.getData("text/plain"));
-    const to = pos;
-    if(!Number.isInteger(from) || from===to) return;
-
-    const tmp = selected[from];
-    selected[from] = selected[to];
-    selected[to] = tmp;
-
-    saveSelected();
-    drawMembers();
-    drawPyramid();
-  });
-}
-
-/* 1人戻す */
+/* 戻す */
 function undo(){
   selected.pop();
-  swapPickIndex = null;
+  swapPickIndex=null;
   saveSelected();
   drawMembers();
   drawPyramid();
@@ -498,7 +476,7 @@ function undo(){
 /* リセット */
 function resetAll(){
   selected = [];
-  swapPickIndex = null;
+  swapPickIndex=null;
   saveSelected();
   drawMembers();
   drawPyramid();
@@ -522,24 +500,24 @@ async function saveImage(){
     alert("画像保存ライブラリの読み込みに失敗しました。スクショで保存してね！");
     return;
   }
-  const toast = document.getElementById("toast");
-  toast.style.display = "block";
+  const toast=document.getElementById("toast");
+  toast.style.display="block";
 
   try{
     const canvas = await html2canvas(document.getElementById("captureArea"), {
-      backgroundColor: "#ffffff",
-      useCORS: true,
-      allowTaint: false,
-      scale: 2
+      backgroundColor:"#ffffff",
+      useCORS:true,
+      allowTaint:false,
+      scale:2
     });
-    const link = document.createElement("a");
-    link.download = "oshimaker.png";
-    link.href = canvas.toDataURL("image/png");
+    const link=document.createElement("a");
+    link.download="oshimaker.png";
+    link.href=canvas.toDataURL("image/png");
     link.click();
   }catch(e){
     alert("画像生成に失敗しました。iPhoneのスクショで保存してね！（画像URL側の制限の可能性あり）");
   }finally{
-    toast.style.display = "none";
+    toast.style.display="none";
   }
 }
 
