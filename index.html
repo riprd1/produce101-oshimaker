@@ -4,18 +4,30 @@
 <meta charset="UTF-8">
 <title>日プ新世界 推しメーカー</title>
 </head>
+
 <body>
 
 <h1>日プ新世界 推しメーカー</h1>
 <p>created by @12agassi</p>
 
+<input type="text" id="name" placeholder="推しの名前を入力">
 <button onclick="add()">推し追加</button>
 
-<div id="list"></div>
+<ul id="list"></ul>
 
 <script>
 function add(){
-document.getElementById("list").innerHTML += "⭐推し<br>";
+let name = document.getElementById("name").value;
+
+if(name===""){
+alert("名前入れて！");
+return;
+}
+
+document.getElementById("list").innerHTML
++= "<li>"+name+"</li>";
+
+document.getElementById("name").value="";
 }
 </script>
 
