@@ -131,62 +131,60 @@
   }
   .hint{font-size:12px;color:var(--muted);margin:6px 2px 0}
 
-  /* ピラミッド */
+  /* ピラミッド（全員同じ丸サイズ） */
   .pyramidPad{padding: 10px 10px 14px;}
   .pyramid{
     display:flex;
     flex-direction:column;
-    gap: 12px;
-    padding: 8px 0 6px;
+    gap: 18px;
+    padding: 16px 0 10px;
   }
   .row{
     display:flex;
     justify-content:center;
-    gap: 12px;
+    gap: 22px;
   }
 
   .picked{
-    width: 92px;
+    width:110px;
     text-align:center;
     position:relative;
-    user-select:none;
-    -webkit-user-select:none;
-    touch-action: manipulation;
   }
-  .picked .avatar{
-    width:92px;height:92px;border-radius:999px;
-    border: 5px solid #d9d9d9;
+  .avatar{
+    width:110px;height:110px;border-radius:999px;
+    border: 6px solid #d9d9d9;
     background:#fff;
     overflow:hidden;
-    box-shadow: 0 6px 18px rgba(0,0,0,.10);
+    box-shadow: 0 8px 20px rgba(0,0,0,.12);
     margin: 0 auto;
   }
-  .picked img{
+  .avatar img{
     width:100%;height:100%;
     object-fit:cover;
     display:block;
   }
   .picked .name{
-    font-size:11px;
+    font-size:13px;
     line-height:1.2;
-    margin-top:6px;
+    margin-top:8px;
+    font-weight:600;
     padding: 0 2px;
   }
   .rank{
     position:absolute;
-    left: 6px;
-    top: 2px;
+    left:-6px;
+    top:-6px;
     background: var(--blue);
     color:#fff;
     border-radius:999px;
-    font-size:12px;
+    font-size:14px;
     font-weight:700;
-    padding: 4px 8px;
-    border: 2px solid #fff;
+    padding: 6px 10px;
+    border: 3px solid #fff;
     box-shadow: 0 4px 10px rgba(0,0,0,.12);
   }
 
-  /* 空枠（＋） */
+  /* 空枠（＋）は見た目だけ。説明文は出さない */
   .empty{
     opacity:.18;
     filter: grayscale(1);
@@ -199,7 +197,24 @@
     font-size:34px;
     color:#555;
   }
-  .empty .name{visibility:hidden;}
+  .empty .name{display:none;}
+  .empty .rank{display:none;}
+
+  /* 並び替えコントロール（矢印） */
+  .reorder{
+    display:flex;
+    justify-content:center;
+    gap:10px;
+    margin-top:8px;
+  }
+  .reorder button{
+    padding:8px 12px;
+    border-radius:999px;
+    border:1px solid #dcdcdc;
+    background:#fff;
+    font-size:16px;
+    line-height:1;
+  }
 
   /* ボタン */
   .actions{
@@ -219,17 +234,6 @@
   button:active{transform:scale(.98)}
   .primary{border-color: #cfe2ff;}
   .danger{border-color:#ffd6d6;}
-  .modeOn{
-    background: rgba(26,115,232,.10);
-    border-color: rgba(26,115,232,.35);
-  }
-
-  .note{
-    margin: 0 10px 12px;
-    font-size: 12px;
-    color: var(--muted);
-    text-align:center;
-  }
 
   .toast{
     position: fixed;
@@ -269,14 +273,9 @@
 
     <div class="actions">
       <button class="primary" onclick="saveImage()">画像として保存</button>
-      <button id="swapBtn" onclick="toggleSwapMode()">並び替えモード</button>
       <button onclick="undo()">1人戻す</button>
       <button class="danger" onclick="resetAll()">リセット</button>
     </div>
-    <p class="note">
-      ※最大11人まで（12人目は追加できません）／長押しで削除できます／並び替えモード中は「2回タップで入れ替え」<br>
-      ★ 形は常に <b>1 / 2 / 3 / 5</b> で固定（空きは「＋」で表示）
-    </p>
   </div>
 
   <div class="sectionTitle">練習生一覧（押して追加）</div>
@@ -292,7 +291,7 @@
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
 <script>
-/* ✅ ヘッダー画像 */
+/* ヘッダー画像 */
 const HEADER_IMAGE_URL = "https://i.imgur.com/nYBRUdd.png";
 
 /* 練習生（増やすときはここに追加） */
@@ -305,13 +304,10 @@ const trainees=[
 ];
 
 const rowSizes = [1,2,3,5];
-const STORAGE_KEY = "oshimaker_selected_v3";
+const STORAGE_KEY = "oshimaker_selected_final";
 
+/* selected は trainees の index 配列 */
 let selected = loadSelected();
-
-/* 並び替え */
-let swapMode = false;
-let swapPickIndex = null;
 
 /* ヘッダー帯 */
 (function setupBanner(){
@@ -346,7 +342,7 @@ function add(i){
   drawPyramid();
 }
 
-/* ★固定ピラミッド：常に 1/2/3/5 を作る（空枠も表示） */
+/* ★固定ピラミッド（空きは＋） */
 function drawPyramid(){
   const p=document.getElementById("pyramid");
   p.innerHTML="";
@@ -358,34 +354,28 @@ function drawPyramid(){
     row.className="row";
 
     for(let k=0;k<size;k++){
+      // slot container
       const slot=document.createElement("div");
-      slot.className="picked";
 
-      // 選択済みがあるなら表示、なければ「＋」の空枠
       if(idx < selected.length){
         const traineeIndex = selected[idx];
         const m = trainees[traineeIndex];
 
+        slot.className="picked";
         slot.innerHTML = `
           <div class="rank">${idx+1}</div>
           <div class="avatar"><img src="${m.img}" alt=""></div>
           <div class="name">${m.name}</div>
+          <div class="reorder">
+            <button onclick="moveLeft(${idx})" aria-label="left">←</button>
+            <button onclick="moveRight(${idx})" aria-label="right">→</button>
+          </div>
         `;
-
-        // 並び替えモード：タップで入替（iPhone向け）
-        slot.addEventListener("click", ()=>onPickedClick(idx));
-
-        // 長押し削除（0.5秒）
-        attachLongPressDelete(slot, idx);
-
-        // 並び替えの見た目
-        if(swapMode) slot.classList.add("modeOn");
-        if(swapPickIndex === idx) slot.style.outline = "4px solid rgba(26,115,232,.55)";
       }else{
-        slot.classList.add("empty");
+        slot.className="picked empty";
         slot.innerHTML = `
           <div class="avatar">+</div>
-          <div class="name">empty</div>
+          <div class="name"></div>
         `;
       }
 
@@ -397,68 +387,21 @@ function drawPyramid(){
   });
 }
 
-/* 長押し削除 */
-function attachLongPressDelete(el, pos){
-  let timer=null;
-
-  const start=()=>{
-    if(swapMode) return;
-    clearTimeout(timer);
-    timer=setTimeout(()=>removeAt(pos), 500);
-  };
-  const cancel=()=>{
-    clearTimeout(timer);
-    timer=null;
-  };
-
-  el.addEventListener("touchstart", start, {passive:true});
-  el.addEventListener("touchend", cancel, {passive:true});
-  el.addEventListener("touchmove", cancel, {passive:true});
-  el.addEventListener("mousedown", start);
-  el.addEventListener("mouseup", cancel);
-  el.addEventListener("mouseleave", cancel);
-}
-
-/* 削除 */
-function removeAt(pos){
-  if(pos<0 || pos>=selected.length) return;
-  selected.splice(pos,1);
-  swapPickIndex=null;
+/* 確実に動く並び替え：矢印で入れ替え（スマホOK） */
+function moveLeft(pos){
+  if(pos<=0) return;
+  const tmp = selected[pos-1];
+  selected[pos-1] = selected[pos];
+  selected[pos] = tmp;
   saveSelected();
   drawMembers();
   drawPyramid();
 }
-
-/* 並び替えモード */
-function toggleSwapMode(){
-  swapMode = !swapMode;
-  swapPickIndex = null;
-  const btn=document.getElementById("swapBtn");
-  btn.classList.toggle("modeOn", swapMode);
-  btn.textContent = swapMode ? "並び替え中（タップで入替）" : "並び替えモード";
-  drawPyramid();
-}
-
-/* 並び替え：2回タップで入替 */
-function onPickedClick(pos){
-  if(!swapMode) return;
-
-  if(swapPickIndex === null){
-    swapPickIndex = pos;
-    drawPyramid();
-    return;
-  }
-  if(swapPickIndex === pos){
-    swapPickIndex = null;
-    drawPyramid();
-    return;
-  }
-
-  const tmp = selected[swapPickIndex];
-  selected[swapPickIndex] = selected[pos];
+function moveRight(pos){
+  if(pos>=selected.length-1) return;
+  const tmp = selected[pos+1];
+  selected[pos+1] = selected[pos];
   selected[pos] = tmp;
-
-  swapPickIndex = null;
   saveSelected();
   drawMembers();
   drawPyramid();
@@ -467,7 +410,6 @@ function onPickedClick(pos){
 /* 戻す */
 function undo(){
   selected.pop();
-  swapPickIndex=null;
   saveSelected();
   drawMembers();
   drawPyramid();
@@ -476,7 +418,6 @@ function undo(){
 /* リセット */
 function resetAll(){
   selected = [];
-  swapPickIndex=null;
   saveSelected();
   drawMembers();
   drawPyramid();
