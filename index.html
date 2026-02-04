@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>日プ新世界 推しメーカー</title>
-
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
 <style>
@@ -12,34 +11,50 @@ body{
   margin:0;
   font-family:system-ui;
   background:#f6f6f6;
+  height:100vh;
+  display:flex;
+  flex-direction:column;
 }
 
-/* ===== ヘッダー ===== */
+/* ================= ヘッダー ================= */
 header{
+  height:60px;
+  background:#fff;
+  border-bottom:1px solid #eee;
+  padding:10px 16px;
   position:sticky;
   top:0;
-  background:#fff;
-  padding:12px;
-  border-bottom:1px solid #eee;
   z-index:10;
 }
+header h1{margin:0;font-size:18px}
+header small{color:#666}
 
-/* ===== ピラミッド固定エリア ===== */
-.pyramidArea{
-  position:sticky;
-  top:70px;
+/* ================= レイアウト 5:5 ================= */
+.container{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+}
+
+.topArea{
+  height:50vh;
+  overflow:hidden;
   background:#fff;
-  z-index:5;
-  padding:14px 0 10px;
   border-bottom:1px solid #eee;
 }
 
-/* ===== 自動サイズ丸 ===== */
-:root{
-  --size: clamp(62px, 17vw, 88px);
+.bottomArea{
+  height:50vh;
+  overflow:auto;
+  background:#fff;
 }
 
-/* ===== ピラミッド ===== */
+/* ================= ピラミッド ================= */
+
+:root{
+  --size: clamp(58px, 14vw, 84px);
+}
+
 .row{
   display:flex;
   justify-content:center;
@@ -60,7 +75,6 @@ header{
   overflow:hidden;
   margin:auto;
   position:relative;
-  background:#fff;
 }
 
 .avatar img{
@@ -69,7 +83,7 @@ header{
   object-fit:cover;
 }
 
-/* ===== 順位（真ん中下密着）===== */
+/* 順位バッジ */
 .rank{
   position:absolute;
   left:50%;
@@ -77,40 +91,44 @@ header{
   transform:translateX(-50%);
   background:#1a73e8;
   color:#fff;
-  font-weight:bold;
   border-radius:999px;
   padding:4px 9px;
   font-size:12px;
+  font-weight:bold;
   border:2px solid #fff;
 }
 
-/* ===== 名前1行固定 ===== */
+/* 名前1行 */
 .name{
-  margin-top:10px;
   font-size:12px;
   font-weight:bold;
+  margin-top:8px;
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
 }
 
-/* ===== ボタン ===== */
+/* ================= ボタン ================= */
 .actions{
   text-align:center;
-  padding:10px;
+  padding:8px;
 }
 button{
   margin:4px;
-  padding:9px 12px;
+  padding:8px 12px;
 }
 
-/* ===== 下の一覧（絶対安定スクロール） ===== */
-.listWrap{
-  height:50vh;
-  overflow:auto;
-  background:#fff;
+/* ================= 検索 ================= */
+.search{
+  padding:8px;
+}
+.search input{
+  width:100%;
+  padding:8px;
+  font-size:14px;
 }
 
+/* ================= 一覧 ================= */
 .member{
   display:flex;
   gap:10px;
@@ -119,14 +137,17 @@ button{
   border-bottom:1px solid #eee;
   cursor:pointer;
 }
-
 .member img{
-  width:50px;
-  height:50px;
+  width:48px;
+  height:48px;
   border-radius:50%;
 }
+.member.selected{
+  opacity:.3;
+  pointer-events:none;
+}
 
-/* ===== 保存用 ===== */
+/* ================= 保存用 ================= */
 #export{
   position:fixed;
   left:-9999px;
@@ -138,39 +159,21 @@ button{
 .exportRow{
   display:flex;
   justify-content:center;
-  gap:42px;
+  gap:40px;
   margin:26px 0;
 }
 .exportAvatar{
-  width:120px;
-  height:120px;
-  border-radius:50%;
-  border:7px solid #ddd;
-  overflow:hidden;
-  position:relative;
+  width:120px;height:120px;border-radius:50%;
+  border:7px solid #ddd;overflow:hidden;position:relative;
 }
-.exportAvatar img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-}
+.exportAvatar img{width:100%;height:100%;object-fit:cover;}
 .exportRank{
-  position:absolute;
-  left:50%;
-  bottom:-6px;
-  transform:translateX(-50%);
-  background:#1a73e8;
-  color:#fff;
-  border-radius:999px;
-  padding:6px 12px;
-  font-weight:bold;
-  border:3px solid #fff;
+  position:absolute;left:50%;bottom:-6px;transform:translateX(-50%);
+  background:#1a73e8;color:#fff;border-radius:999px;
+  padding:6px 12px;border:3px solid #fff;font-weight:bold;
 }
 .exportName{
-  text-align:center;
-  font-size:14px;
-  font-weight:bold;
-  margin-top:10px;
+  text-align:center;font-size:14px;font-weight:bold;margin-top:8px;
 }
 </style>
 </head>
@@ -178,26 +181,37 @@ button{
 <body>
 
 <header>
-  <h2>日プ新世界 推しメーカー</h2>
+  <h1>日プ新世界 推しメーカー</h1>
   <small>created by @12agassi</small>
 </header>
 
-<div class="pyramidArea">
-  <div id="pyramid"></div>
+<div class="container">
 
-  <div class="actions">
-    <button onclick="saveImage()">画像として保存</button>
-    <button onclick="undo()">1人戻す</button>
-    <button onclick="resetAll()">リセット</button>
+  <!-- ================= 上：ピラミッド ================= -->
+  <div class="topArea">
+    <div id="pyramid"></div>
+
+    <div class="actions">
+      <button onclick="saveImage()">画像として保存</button>
+      <button onclick="undo()">1人戻す</button>
+      <button onclick="resetAll()">リセット</button>
+    </div>
   </div>
-</div>
 
-<div class="listWrap" id="members"></div>
+  <!-- ================= 下：一覧 ================= -->
+  <div class="bottomArea">
+    <div class="search">
+      <input placeholder="Search" oninput="drawList(this.value)">
+    </div>
+    <div id="members"></div>
+  </div>
+
+</div>
 
 <div id="export"></div>
 
 <script>
-const trainees = [
+const trainees=[
 {name:"アダム・ナガイ(ADAM)",img:"https://i.imgur.com/6QGzvRx.png"},
 {name:"中丸 晏寿(AJU)",img:"https://i.imgur.com/KiZCKos.png"},
 {name:"オム・スアンカワーテン(AOM)",img:"https://i.imgur.com/dDIFJSc.png"},
@@ -217,6 +231,7 @@ let selected=[];
 
 function clean(n){return n.replace(/\([^)]*\)/g,"")}
 
+/* ===== ピラミッド描画 ===== */
 function draw(){
  const p=document.getElementById("pyramid");
  p.innerHTML="";
@@ -242,6 +257,7 @@ function draw(){
     }else{
       s.innerHTML=`<div class="avatar" style="opacity:.2"></div>`;
     }
+
     row.appendChild(s);
     i++;
   }
@@ -249,21 +265,38 @@ function draw(){
  });
 }
 
-function drawList(){
+/* ===== 一覧 ===== */
+function drawList(q=""){
  const m=document.getElementById("members");
  m.innerHTML="";
+ q=q.toLowerCase();
+
  trainees.forEach((t,i)=>{
+   if(q && !t.name.toLowerCase().includes(q)) return;
+
    const d=document.createElement("div");
    d.className="member";
+   if(selected.includes(i)) d.classList.add("selected");
+
    d.innerHTML=`<img src="${t.img}"><div>${clean(t.name)}</div>`;
-   d.onclick=()=>{if(selected.length<11) selected.push(i); draw();}
+
+   d.onclick=()=>{
+     if(selected.includes(i)) return;
+     if(selected.length>=11) return;
+     selected.push(i);
+     draw();
+     drawList();
+   };
+
    m.appendChild(d);
  });
 }
 
-function undo(){selected.pop();draw();}
-function resetAll(){selected=[];draw();}
+/* ===== 操作 ===== */
+function undo(){selected.pop();draw();drawList();}
+function resetAll(){selected=[];draw();drawList();}
 
+/* ===== 保存 ===== */
 async function saveImage(){
  const ex=document.getElementById("export");
  ex.innerHTML="";
@@ -274,18 +307,17 @@ async function saveImage(){
   row.className="exportRow";
 
   for(let k=0;k<r;k++){
-    const s=document.createElement("div");
     if(selected[i]!=null){
       const t=trainees[selected[i]];
-      s.innerHTML=`
-        <div class="exportAvatar">
-          <img src="${t.img}">
-          <div class="exportRank">${i+1}</div>
-        </div>
-        <div class="exportName">${clean(t.name)}</div>
-      `;
+      row.innerHTML+=`
+        <div>
+          <div class="exportAvatar">
+            <img src="${t.img}">
+            <div class="exportRank">${i+1}</div>
+          </div>
+          <div class="exportName">${clean(t.name)}</div>
+        </div>`;
     }
-    row.appendChild(s);
     i++;
   }
   ex.appendChild(row);
