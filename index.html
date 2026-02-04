@@ -14,7 +14,9 @@
     --muted:#666;
     --shadow: 0 4px 14px rgba(0,0,0,.06);
     --radius:14px;
-    --blue:#1a73e8;
+
+    /* ★ここだけ変更：青を固定 */
+    --blue:#0080ff;
 
     /* ★JSで自動調整（幅/高さどっちも見て「必ず収まる」） */
     --slot: 82px;
@@ -91,7 +93,7 @@
 
   /* ピラミッド */
   .pyramidWrap{
-    padding: 12px 14px 8px; /* ★左右余白を少し増やして切れにくく */
+    padding: 12px 14px 8px;
   }
   .pyramid{
     display:flex;
@@ -121,6 +123,7 @@
     box-shadow: 0 8px 18px rgba(0,0,0,.10);
     margin: 0 auto;
     position:relative;
+    z-index: 1;
   }
   .avatar img{
     width:100%;
@@ -130,25 +133,29 @@
     display:block;
   }
 
-  /* ★順位：数字を小さく／白枠なし／必ず前面 */
+  /* ★ここだけ変更：数字もっと小さく＋絶対前面 */
   .rank{
     position:absolute;
     left:50%;
-    bottom:-10px;
+    bottom:-10px;                 /* 下に少しはみ出して「丸の下にかかる」 */
     transform: translateX(-50%);
-    background: var(--blue);
+    background: var(--blue);      /* #0080ff 固定 */
     color:#fff;
     border-radius:999px;
     font-weight:900;
-    font-size: 11px;           /* ★少し小さく */
-    padding: 5px 9px;
-    border: none;              /* ★白枠消す */
+    font-size: 9px;               /* ★さらに小さく */
+    padding: 5px 8px;
+    border: none;
     line-height:1;
-    min-width: 2.1em;
+    min-width: 2.0em;
     text-align:center;
-    z-index: 999;              /* ★絶対前面 */
+
+    z-index: 9999;                /* ★必ず表に */
     box-shadow: 0 6px 14px rgba(0,0,0,.18);
     pointer-events:none;
+
+    /* ★iOS/Safariで重なり順が崩れるのを防ぐ */
+    transform-origin: center;
   }
 
   /* 名前：基本1行 */
@@ -378,6 +385,7 @@
     margin: 0 auto;
     box-shadow: 0 10px 22px rgba(0,0,0,.10);
     position:relative;
+    z-index:1;
   }
   .exportAvatar img{
     width:100%;
@@ -387,7 +395,7 @@
     display:block;
   }
 
-  /* ★保存画像側も同じ：小さめ／白枠なし／前面 */
+  /* ★保存画像側も同じ：青固定／数字小さめ／白枠なし／前面 */
   .exportRank{
     position:absolute;
     left:50%;
@@ -397,13 +405,13 @@
     color:#fff;
     border-radius:999px;
     font-weight:900;
-    font-size: 14px;     /* 少し小さく */
-    padding: 7px 11px;
-    border:none;         /* 白枠なし */
+    font-size: 12px;     /* ★少し小さく */
+    padding: 7px 10px;
+    border:none;
     line-height:1;
-    min-width: 2.3em;
+    min-width: 2.2em;
     text-align:center;
-    z-index: 999;
+    z-index: 9999;       /* ★必ず表 */
     box-shadow: 0 8px 16px rgba(0,0,0,.18);
     pointer-events:none;
   }
@@ -543,7 +551,7 @@ function alphaPart(full){
   return m ? "(" + m[1] + ")" : "";
 }
 
-/* ★幅・高さどっちも見て「11個が絶対に切れない」ようにslot/gapを決定 */
+/* 幅・高さどっちも見て「11個が絶対に切れない」ようにslot/gapを決定 */
 function fitPyramidToViewport(){
   const headerH = document.querySelector("header")?.getBoundingClientRect().height || 60;
 
@@ -552,22 +560,18 @@ function fitPyramidToViewport(){
   if(!card || !wrap) return;
 
   const cardRect = card.getBoundingClientRect();
-  const wrapRect = wrap.getBoundingClientRect();
 
-  // 使える幅（カード内）
-  const availableW = cardRect.width - 28; // pyramidWrapの左右padding分ざっくり差し引き（14*2）
-  // 使える高さ（画面内に「見切れず」収めたい）
-  const availableH = window.innerHeight - headerH - 12 /*main pad*/ - 12;
+  const availableW = cardRect.width - 28;
+  const availableH = window.innerHeight - headerH - 12 - 12;
 
   const bannerH = 110;
-  const actionsH = 72;  // ボタン行のだいたい
+  const actionsH = 72;
   const wrapPad = 12+8+10;
   const nameH = 16;
-  const badgeOut = 14;  // バッジが下に出る分
+  const badgeOut = 16;
 
-  const maxRow = 5; // 1,2,3,5の最大
+  const maxRow = 5;
 
-  // 初期値（大きめから縮める）
   let slot = 92;
   let gap  = 18;
 
@@ -575,15 +579,11 @@ function fitPyramidToViewport(){
     return bannerH + actionsH + wrapPad + (s*4) + (g*3) + (nameH*4) + badgeOut;
   }
   function needSlotByWidth(g){
-    // 5人が横に並ぶのに必要なslot上限
-    // slot*5 + gap*4 <= availableW
     return Math.floor((availableW - g*(maxRow-1)) / maxRow);
   }
 
-  // 幅制約でslotをまず落とす
   slot = Math.min(slot, needSlotByWidth(gap));
 
-  // 高さ制約も満たすまで縮める
   while((needHeight(slot,gap) > availableH || slot*maxRow + gap*(maxRow-1) > availableW) && slot > 62){
     slot -= 2;
     if(slot < needSlotByWidth(gap)) slot = needSlotByWidth(gap);
@@ -596,7 +596,6 @@ function fitPyramidToViewport(){
   document.documentElement.style.setProperty("--gap", gap + "px");
 }
 
-/* 一覧描画 */
 function drawMembers(){
   const q = (document.getElementById("search").value || "").trim().toLowerCase();
   const membersEl = document.getElementById("members");
@@ -625,12 +624,14 @@ function drawMembers(){
 function add(i){
   if(selected.length >= 11){ alert("11人まで！"); return; }
   if(selected.includes(i)) return;
+
   selected.push(i);
   saveSelected();
+
   drawMembers();
   drawPyramid();
   drawExportPyramid();
-  fitPyramidToViewport(); // ★追加後も切れないよう再計算
+  fitPyramidToViewport();
 }
 
 function undo(){
@@ -667,6 +668,7 @@ function toggleReorder(){
   document.body.classList.toggle("reorder-on", reorderMode);
   document.getElementById("reorderBtn").textContent = `並び替えモード：${reorderMode ? "ON" : "OFF"}`;
 }
+
 function swap(posA, posB){
   if(posA < 0 || posB < 0) return;
   if(posA >= selected.length || posB >= selected.length) return;
@@ -678,6 +680,7 @@ function swap(posA, posB){
   drawPyramid();
   drawExportPyramid();
 }
+
 function moveLeft(pos){ swap(pos, pos-1); }
 function moveRight(pos){ swap(pos, pos+1); }
 
@@ -756,7 +759,6 @@ async function saveImage(){
   }
 
   drawExportPyramid();
-
   const toast = document.getElementById("toast");
   toast.style.display = "block";
 
