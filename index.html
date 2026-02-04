@@ -1,35 +1,41 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>日プ新世界 推しメーカー</title>
-</head>
-
-<body>
-
-<h1>日プ新世界 推しメーカー</h1>
-<p>created by @12agassi</p>
-
-<input type="text" id="name" placeholder="推しの名前を入力">
-<button onclick="add()">推し追加</button>
-
-<ul id="list"></ul>
-
 <script>
-function add(){
-let name = document.getElementById("name").value;
 
-if(name===""){
-alert("名前入れて！");
-return;
+const trainees=[
+{name:"アダム・ナガイ(ADAM)",img:"https://i.imgur.com/6QGzvRx.png"},
+{name:"中丸 晏寿(AJU)",img:"https://i.imgur.com/KiZCKos.png"},
+{name:"オム・スアンカワーテン(AOM)",img:"https://i.imgur.com/dDIFJSc.png"},
+{name:"アーチャー・ウイ(ARCHER)",img:"https://i.imgur.com/5iIerqN.png"},
+{name:"篠ヶ谷 歩夢(S.AYUMU)",img:"https://i.imgur.com/YJAdh8q.png"}
+];
+
+let selected=[];
+
+function drawMembers(){
+let html="";
+trainees.forEach((m,i)=>{
+html+=`
+<div onclick="add(${i})" style="display:inline-block;margin:10px;cursor:pointer;">
+<img src="${m.img}" width="80"><br>${m.name}
+</div>`;
+});
+document.body.insertAdjacentHTML("beforeend","<h2>練習生一覧</h2><div id='members'>"+html+"</div><h2>選択したメンバー</h2><div id='pyramid'></div>");
 }
 
-document.getElementById("list").innerHTML
-+= "<li>"+name+"</li>";
-
-document.getElementById("name").value="";
+function add(i){
+selected.push(trainees[i]);
+drawPyramid();
 }
+
+function drawPyramid(){
+let html="";
+selected.forEach(m=>{
+html+=`<div style="display:inline-block;margin:5px;">
+<img src="${m.img}" width="80"><br>${m.name}
+</div>`;
+});
+document.getElementById("pyramid").innerHTML=html;
+}
+
+drawMembers();
+
 </script>
-
-</body>
-</html>
