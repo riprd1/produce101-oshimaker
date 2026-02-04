@@ -15,7 +15,7 @@
     --shadow: 0 4px 14px rgba(0,0,0,.06);
     --radius:14px;
 
-    /* ★ここだけ変更：青を固定 */
+    /* ★青固定 */
     --blue:#0080ff;
 
     /* ★JSで自動調整（幅/高さどっちも見て「必ず収まる」） */
@@ -113,49 +113,51 @@
     width: var(--slot);
     text-align:center;
   }
+
+  /* ★枠色を #0080ff に（白枠→青枠） */
   .avatar{
     width: var(--slot);
     height: var(--slot);
     border-radius:999px;
-    border: 5px solid #d9d9d9;
+    border: 5px solid var(--blue); /* ★ここ変更 */
     background:#fff;
-    overflow:hidden;
+    overflow: visible;             /* ★バッジを外に出しても切れない */
     box-shadow: 0 8px 18px rgba(0,0,0,.10);
     margin: 0 auto;
     position:relative;
     z-index: 1;
   }
+
+  /* 画像は「内側の丸」でクリップする */
   .avatar img{
     width:100%;
     height:100%;
+    border-radius:999px;           /* ★追加：画像自体を丸く */
     object-fit: cover;
     object-position: 50% 35%;
     display:block;
   }
 
-  /* ★ここだけ変更：数字もっと小さく＋絶対前面 */
+  /* ★順位：必ず見える（画像の外に出す＋前面） */
   .rank{
     position:absolute;
     left:50%;
-    bottom:-10px;                 /* 下に少しはみ出して「丸の下にかかる」 */
+    bottom:-12px;                  /* ★さらに下に出して「隠れ」をゼロに */
     transform: translateX(-50%);
-    background: var(--blue);      /* #0080ff 固定 */
+    background: var(--blue);
     color:#fff;
     border-radius:999px;
     font-weight:900;
-    font-size: 9px;               /* ★さらに小さく */
-    padding: 5px 8px;
+    font-size: 9px;
+    padding: 6px 8px;
     border: none;
     line-height:1;
     min-width: 2.0em;
     text-align:center;
 
-    z-index: 9999;                /* ★必ず表に */
+    z-index: 9999;
     box-shadow: 0 6px 14px rgba(0,0,0,.18);
     pointer-events:none;
-
-    /* ★iOS/Safariで重なり順が崩れるのを防ぐ */
-    transform-origin: center;
   }
 
   /* 名前：基本1行 */
@@ -377,10 +379,12 @@
     width: 130px;
     text-align:center;
   }
+
+  /* ★保存画像の枠色も #0080ff */
   .exportAvatar{
     width:130px;height:130px;border-radius:999px;
-    border: 8px solid #d9d9d9;
-    overflow:hidden;
+    border: 8px solid var(--blue); /* ★ここ変更 */
+    overflow: visible;              /* ★バッジを外へ */
     background:#fff;
     margin: 0 auto;
     box-shadow: 0 10px 22px rgba(0,0,0,.10);
@@ -390,28 +394,29 @@
   .exportAvatar img{
     width:100%;
     height:100%;
+    border-radius:999px;            /* ★追加 */
     object-fit: cover;
     object-position: 50% 35%;
     display:block;
   }
 
-  /* ★保存画像側も同じ：青固定／数字小さめ／白枠なし／前面 */
+  /* ★保存画像側も「隠れない」位置に */
   .exportRank{
     position:absolute;
     left:50%;
-    bottom:-12px;
+    bottom:-14px;
     transform: translateX(-50%);
     background: var(--blue);
     color:#fff;
     border-radius:999px;
     font-weight:900;
-    font-size: 12px;     /* ★少し小さく */
+    font-size: 12px;
     padding: 7px 10px;
     border:none;
     line-height:1;
     min-width: 2.2em;
     text-align:center;
-    z-index: 9999;       /* ★必ず表 */
+    z-index: 9999;
     box-shadow: 0 8px 16px rgba(0,0,0,.18);
     pointer-events:none;
   }
@@ -527,7 +532,7 @@ const trainees = [
 ];
 
 const rowSizes = [1,2,3,5];
-const STORAGE_KEY = "oshimaker_selected_final_v4";
+const STORAGE_KEY = "oshimaker_selected_final_v5";
 
 let reorderMode = false;
 let selected = loadSelected();
@@ -567,8 +572,9 @@ function fitPyramidToViewport(){
   const bannerH = 110;
   const actionsH = 72;
   const wrapPad = 12+8+10;
+
   const nameH = 16;
-  const badgeOut = 16;
+  const badgeOut = 22;
 
   const maxRow = 5;
 
@@ -584,9 +590,8 @@ function fitPyramidToViewport(){
 
   slot = Math.min(slot, needSlotByWidth(gap));
 
-  while((needHeight(slot,gap) > availableH || slot*maxRow + gap*(maxRow-1) > availableW) && slot > 62){
+  while((needHeight(slot,gap) > availableH || slot*maxRow + gap*(maxRow-1) > availableW) && slot > 58){
     slot -= 2;
-    if(slot < needSlotByWidth(gap)) slot = needSlotByWidth(gap);
     gap  -= 1;
     if(gap < 10) gap = 10;
     slot = Math.min(slot, needSlotByWidth(gap));
