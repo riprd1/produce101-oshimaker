@@ -119,30 +119,28 @@
     width: var(--slot);
     height: var(--slot);
     border-radius:999px;
-    border: 5px solid var(--blue); /* ★ここ変更 */
+    border: 5px solid var(--blue);
     background:#fff;
-    overflow: visible;             /* ★バッジを外に出しても切れない */
+    overflow: visible;
     box-shadow: 0 8px 18px rgba(0,0,0,.10);
     margin: 0 auto;
     position:relative;
     z-index: 1;
   }
 
-  /* 画像は「内側の丸」でクリップする */
   .avatar img{
     width:100%;
     height:100%;
-    border-radius:999px;           /* ★追加：画像自体を丸く */
+    border-radius:999px;
     object-fit: cover;
     object-position: 50% 35%;
     display:block;
   }
 
-  /* ★順位：必ず見える（画像の外に出す＋前面） */
   .rank{
     position:absolute;
     left:50%;
-    bottom:-12px;                  /* ★さらに下に出して「隠れ」をゼロに */
+    bottom:-12px;
     transform: translateX(-50%);
     background: var(--blue);
     color:#fff;
@@ -160,7 +158,6 @@
     pointer-events:none;
   }
 
-  /* 名前：基本1行 */
   .name{
     margin-top: 14px;
     font-size: 12px;
@@ -171,7 +168,6 @@
     text-overflow: ellipsis;
   }
 
-  /* 空（＋） */
   .empty .avatar{
     opacity:.16;
     display:flex;
@@ -184,7 +180,6 @@
   .empty .rank{display:none;}
   .empty .name{display:none;}
 
-  /* 並び替え矢印（通常OFFで非表示） */
   .reorder{
     display:none;
     gap:10px;
@@ -201,7 +196,6 @@
     line-height: 1;
   }
 
-  /* 操作ボタン */
   .actions{
     display:flex;
     gap:10px;
@@ -223,7 +217,6 @@
   .danger{border-color:#ffd6d6;}
   .mode{border-color:#e7e7e7;}
 
-  /* 下：練習生一覧（縦1列 + 検索 + スクロール） */
   .listCard{
     margin-top: 12px;
     padding: 10px;
@@ -317,19 +310,19 @@
     z-index:999;
   }
 
-  /* ===== 保存専用エリア（1004×924固定） ===== */
+  /* ===== 保存専用エリア（1004×1040固定） ===== */
   #exportArea{
     position: fixed;
     left: -10000px;
     top: 0;
     width: 1004px;
-    height: 1040px;
+    height: 1040px; /* ★ 924 → 1040 */
     background: #ffffff;
     overflow: hidden;
   }
   #exportInner{
     width: 1004px;
-    height: 1040px;
+    height: 1040px; /* ★ 924 → 1040 */
     position: relative;
     background:#fff;
     overflow:hidden;
@@ -380,27 +373,27 @@
     text-align:center;
   }
 
-  /* ★保存画像の枠色も #0080ff */
   .exportAvatar{
     width:130px;height:130px;border-radius:999px;
-    border: 8px solid var(--blue); /* ★ここ変更 */
-    overflow: visible;              /* ★バッジを外へ */
+    border: 8px solid var(--blue);
+    overflow: visible;
     background:#fff;
     margin: 0 auto;
     box-shadow: 0 10px 22px rgba(0,0,0,.10);
     position:relative;
     z-index:1;
   }
-  .exportAvatar img{
+
+  /* ★ここが潰れ対策（保存用はimgを使わず背景でcover） */
+  .exportPhoto{
     width:100%;
     height:100%;
-    border-radius:999px;            /* ★追加 */
-    object-fit: cover;
-    object-position: 50% 35%;
-    display:block;
+    border-radius:999px;
+    background-size: cover;
+    background-position: 50% 35%;
+    background-repeat: no-repeat;
   }
 
-  /* ★保存画像側も「隠れない」位置に */
   .exportRank{
     position:absolute;
     left:50%;
@@ -741,7 +734,7 @@ function drawExportPyramid(){
         slot.className = "exportSlot";
         slot.innerHTML = `
           <div class="exportAvatar">
-            <img src="${m.img}" alt="" crossorigin="anonymous">
+            <div class="exportPhoto" style="background-image:url('${m.img}')"></div>
             <div class="exportRank">${idx+1}</div>
           </div>
           <div class="exportName">${displayName(m.name)}</div>
@@ -777,7 +770,7 @@ async function saveImage(){
     });
 
     const link = document.createElement("a");
-    link.download = "oshimaker_1004x1040.png";
+    link.download = "oshimaker_1004x1040.png"; /* ★表記も合わせる */
     link.href = canvas.toDataURL("image/png");
     link.click();
   }catch(e){
