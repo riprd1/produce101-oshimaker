@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -40,7 +40,7 @@
   .by{margin:6px 0 0;font-size:13px;color:var(--muted)}
   main{max-width:980px;margin:0 auto;padding:12px;}
 
-  /* ===== 画面表示用カード ===== */
+  /* 画面表示用カード */
   .card{
     background: var(--card);
     border: 1px solid var(--line);
@@ -50,7 +50,7 @@
   }
 
   .banner{
-    height: 100px;
+    height: 110px;
     position: relative;
     display:flex;
     align-items:center;
@@ -76,12 +76,19 @@
     letter-spacing: .06em;
     padding: 8px 12px;
     border-radius: 999px;
-    background: rgba(255,255,255,.75);
-    border: 1px solid rgba(255,255,255,.85);
+    background: rgba(255,255,255,.78);
+    border: 1px solid rgba(255,255,255,.9);
     font-size: 14px;
   }
 
-  /* ===== 練習生一覧 ===== */
+  .sectionTitle{
+    font-size: 15px;
+    margin: 12px 2px 8px;
+    color: var(--text);
+    font-weight: 800;
+  }
+
+  /* 練習生一覧 */
   #membersWrap{
     background: var(--card);
     border: 1px solid var(--line);
@@ -125,13 +132,13 @@
   }
   .hint{font-size:12px;color:var(--muted);margin:6px 2px 0}
 
-  /* ===== ピラミッド（画面表示用） ===== */
+  /* ピラミッド（画面） */
   .pyramidPad{padding: 10px 10px 14px;}
   .pyramid{
     display:flex;
     flex-direction:column;
     gap: 18px;
-    padding: 16px 0 10px;
+    padding: 16px 0 12px;
   }
   .row{
     display:flex;
@@ -145,9 +152,9 @@
     position:relative;
   }
   .avatarWrap{
-    position:relative;
     width:110px;
-    margin:0 auto;
+    margin: 0 auto;
+    position: relative;
   }
   .avatar{
     width:110px;height:110px;border-radius:999px;
@@ -155,6 +162,7 @@
     background:#fff;
     overflow:hidden;
     box-shadow: 0 8px 20px rgba(0,0,0,.12);
+    position:relative; /* rankの基準 */
   }
   .avatar img{
     width:100%;height:100%;
@@ -162,18 +170,22 @@
     display:block;
   }
 
-  /* ★順位：丸の下中央（切れない構造） */
+  /* 順位：丸の下中央（ズレないようにサイズ固定＋flex中央） */
   .rank{
     position:absolute;
     left:50%;
-    bottom:-14px;
+    bottom:-16px;
     transform:translateX(-50%);
+    width:34px;
+    height:34px;
+    border-radius:999px;
     background: var(--blue);
     color:#fff;
-    border-radius:999px;
+    font-weight:900;
     font-size:14px;
-    font-weight:800;
-    padding: 6px 12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
     border: 3px solid #fff;
     box-shadow: 0 4px 10px rgba(0,0,0,.12);
     line-height:1;
@@ -182,19 +194,31 @@
   }
 
   .picked .name{
+    margin-top:22px; /* rankの分 */
     font-size:13px;
-    line-height:1.2;
-    margin-top:18px;
-    font-weight:700;
+    font-weight:800;
+    line-height:1.15;
     padding: 0 2px;
   }
 
-  /* 空き（＋）は表示しない（公式っぽく） */
+  /* 空枠（＋） */
   .empty{
-    display:none;
+    opacity:.22;
+    filter: grayscale(1);
   }
+  .empty .avatar{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:900;
+    font-size:36px;
+    color:#666;
+    overflow: visible; /* + が見やすい */
+  }
+  .empty .rank{display:none;}
+  .empty .name{display:none;}
 
-  /* 並び替え矢印（画面だけ） */
+  /* 並び替え矢印（画面だけ。保存には写らない） */
   .reorder{
     display:flex;
     justify-content:center;
@@ -216,7 +240,7 @@
     gap:10px;
     flex-wrap:wrap;
     justify-content:center;
-    padding: 12px 10px 14px;
+    padding: 10px 10px 14px;
   }
   button{
     padding: 11px 12px;
@@ -243,27 +267,26 @@
     z-index:999;
   }
 
-  /* ===== 保存専用エリア（1004×924 固定） ===== */
+  /* ===== 保存専用エリア（1080×1350固定） ===== */
   #exportArea{
     position: fixed;
     left: -10000px;
     top: 0;
-    width: 1004px;
-    height: 924px;   /* ★希望の固定サイズ */
+    width: 1080px;
+    height: 1350px;
     background: #ffffff;
     overflow: hidden;
     box-sizing: border-box;
     padding: 0;
   }
   #exportInner{
-    width: 1004px;
-    height: 924px;
+    width: 1080px;
+    height: 1350px;
     background: #fff;
     position:relative;
   }
-
   .exportBanner{
-    height: 160px;
+    height: 180px;
     background-size: cover;
     background-position: center;
     position:relative;
@@ -277,87 +300,104 @@
   .exportTitlePill{
     position:absolute;
     left:50%;
-    top: 36px;
+    top: 44px;
     transform:translateX(-50%);
-    font-weight:800;
+    font-weight:900;
     letter-spacing:.06em;
     padding: 14px 22px;
     border-radius: 999px;
-    background: rgba(255,255,255,.78);
-    border: 1px solid rgba(255,255,255,.9);
-    font-size: 22px;
+    background: rgba(255,255,255,.80);
+    border: 1px solid rgba(255,255,255,.92);
+    font-size: 24px;
     color:#111;
   }
-
   .exportBody{
-    padding: 28px 60px 0;
+    padding: 34px 70px 150px; /* ★下に安全地帯（フッター被り防止） */
   }
-
-  /* ★「選択したメンバー」文字は保存でも表示しないのでexportH2削除 */
-
   .exportPyramid{
     display:flex;
     flex-direction:column;
-    gap: 34px;
-    padding-top: 20px;
+    gap: 42px;
+    padding-top: 18px;
   }
   .exportRow{
     display:flex;
     justify-content:center;
-    gap: 56px;
+    gap: 66px;
   }
-
   .exportPicked{
-    width: 160px;
+    width: 170px;
     text-align:center;
     position:relative;
   }
 
-  /* 重要：Safari対策 → imgじゃなく背景画像 */
+  /* 保存はSafari対策でbackground-image */
+  .exportAvatarWrap{
+    width:170px;
+    margin:0 auto;
+    position:relative;
+  }
   .exportAvatar{
-    width:160px;height:160px;border-radius:999px;
-    border: 10px solid #d9d9d9;
+    width:170px;height:170px;border-radius:999px;
+    border: 12px solid #d9d9d9;
     background-color:#fff;
     background-size: cover;
     background-position: center;
     margin: 0 auto;
-    box-shadow: 0 10px 24px rgba(0,0,0,.12);
+    box-shadow: 0 12px 26px rgba(0,0,0,.12);
     position:relative;
   }
 
+  /* 保存の順位：丸の下中央（絶対被らない） */
   .exportRank{
     position:absolute;
     left:50%;
-    bottom:-18px;
+    bottom:-20px;
     transform:translateX(-50%);
+    width:44px;
+    height:44px;
+    border-radius:999px;
     background: var(--blue);
     color:#fff;
-    border-radius:999px;
-    font-weight:800;
-    font-size: 18px;
-    padding: 10px 16px;
+    font-weight:900;
+    font-size:18px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
     border: 4px solid #fff;
+    box-shadow: 0 8px 16px rgba(0,0,0,.14);
     line-height:1;
-    box-shadow: 0 6px 14px rgba(0,0,0,.14);
     z-index:5;
   }
 
   .exportName{
-    margin-top: 24px;
-    font-size: 18px;
-    font-weight: 700;
-    line-height: 1.25;
+    margin-top:30px; /* ★rankの分を確実に空ける */
+    font-size: 20px;
+    font-weight: 900;
+    line-height: 1.18;
   }
 
-  /* 保存では空きは何も出さない（＋なし） */
+  /* 保存の空枠（＋） */
   .exportEmpty{
-    display:none;
+    opacity:.18;
+    filter: grayscale(1);
   }
+  .exportEmpty .exportAvatar{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size: 56px;
+    font-weight: 900;
+    color:#666;
+    background-image:none !important;
+  }
+  .exportEmpty .exportRank{display:none;}
+  .exportEmpty .exportName{display:none;}
 
   .exportFooter{
     position:absolute;
     left:0; right:0;
-    bottom: 20px;
+    bottom: 26px;
     text-align:center;
     font-size: 18px;
     color:#666;
@@ -375,14 +415,13 @@
 
 <main>
 
-  <!-- 画面表示用 -->
   <div class="card">
     <div id="banner" class="banner">
       <div class="bannerTitle">AUDITION PICK • YOUR TOP 11</div>
     </div>
 
     <div class="pyramidPad">
-      <!-- ✅「選択したメンバー」削除（ここを消した） -->
+      <!-- 「選択したメンバー」テキストは出さない -->
       <div class="pyramid" id="pyramid"></div>
     </div>
 
@@ -409,10 +448,12 @@
     <div id="exportBanner" class="exportBanner">
       <div class="exportTitlePill">AUDITION PICK • YOUR TOP 11</div>
     </div>
+
     <div class="exportBody">
-      <!-- ✅保存側も「選択したメンバー」削除 -->
+      <!-- 「選択したメンバー」テキストは出さない -->
       <div class="exportPyramid" id="exportPyramid"></div>
     </div>
+
     <div class="exportFooter">created by @12agassi</div>
   </div>
 </div>
@@ -420,21 +461,39 @@
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
 <script>
+/* ヘッダー画像（あなたのやつ） */
 const HEADER_IMAGE_URL = "https://i.imgur.com/nYBRUdd.png";
 
-const trainees=[
+/* 練習生データ */
+const trainees = [
   {name:"アダム・ナガイ(ADAM)",img:"https://i.imgur.com/6QGzvRx.png"},
   {name:"中丸 晏寿(AJU)",img:"https://i.imgur.com/KiZCKos.png"},
   {name:"オム・スアンカワーテン(AOM)",img:"https://i.imgur.com/dDIFJSc.png"},
   {name:"アーチャー・ウイ(ARCHER)",img:"https://i.imgur.com/5iIerqN.png"},
-  {name:"篠ヶ谷 歩夢(S.AYUMU)",img:"https://i.imgur.com/YJAdh8q.png"}
+  {name:"篠ヶ谷 歩夢(S.AYUMU)",img:"https://i.imgur.com/YJAdh8q.png"},
+
+  {name:"小林 千悟(CHISATO)",img:"https://i.imgur.com/Iu0hNBO.png"},
+  {name:"加藤 大樹(K.DAIKI)",img:"https://i.imgur.com/4fRk2EB.png"},
+  {name:"カク・ドンミン(DONGMIN)",img:"https://i.imgur.com/xZSQqMh.png"},
+  {name:"末川 瑛太(EITA)",img:"https://i.imgur.com/alEjKCP.png"},
+  {name:"保里 瑛都(H.EITO)",img:"https://i.imgur.com/IAhs4ZA.png"},
+  {name:"金田 栄都(K.EITO)",img:"https://i.imgur.com/tF7i1du.png"},
+  {name:"櫻井 楓真(FUMA)",img:"https://i.imgur.com/WIWI8Sx.png"}
 ];
 
+/* ピラミッド固定（11枠：1/2/3/5） */
 const rowSizes = [1,2,3,5];
-const STORAGE_KEY = "oshimaker_selected_final_1004x924";
+const STORAGE_KEY = "oshimaker_selected_v_final";
+
+/* 選択状態（traineesのindex配列） */
 let selected = loadSelected();
 
-/* ヘッダー反映 */
+/* 表示用：()の英字を消す（全角/半角どっちも対応） */
+function cleanName(name){
+  return name.replace(/[\(（].+?[\)）]/g, "").trim();
+}
+
+/* ヘッダー反映（画面＆保存） */
 (function setupBanners(){
   const banner = document.getElementById("banner");
   const exportBanner = document.getElementById("exportBanner");
@@ -445,7 +504,7 @@ let selected = loadSelected();
   }
 })();
 
-/* 一覧 */
+/* 一覧描画 */
 function drawMembers(){
   const membersEl = document.getElementById("members");
   membersEl.innerHTML="";
@@ -453,7 +512,7 @@ function drawMembers(){
     const div=document.createElement("div");
     div.className="member";
     if(selected.includes(i)) div.classList.add("selected");
-    div.innerHTML = `<img src="${m.img}" alt=""><div class="name">${m.name}</div>`;
+    div.innerHTML = `<img src="${m.img}" alt=""><div class="name">${cleanName(m.name)}</div>`;
     div.addEventListener("click", ()=>add(i));
     membersEl.appendChild(div);
   });
@@ -461,16 +520,45 @@ function drawMembers(){
 
 /* 追加 */
 function add(i){
-  if(selected.length>=11){ alert("11人まで！"); return; }
+  if(selected.length >= 11){
+    alert("11人まで！");
+    return;
+  }
   if(selected.includes(i)) return;
   selected.push(i);
   saveSelected();
-  drawMembers();
-  drawPyramid();
-  drawExportPyramid();
+  redrawAll();
 }
 
-/* 画面用（空きは出さない） */
+/* 並び替え（矢印） */
+function moveLeft(pos){
+  if(pos <= 0) return;
+  [selected[pos-1], selected[pos]] = [selected[pos], selected[pos-1]];
+  saveSelected();
+  redrawAll();
+}
+function moveRight(pos){
+  if(pos >= selected.length-1) return;
+  [selected[pos+1], selected[pos]] = [selected[pos], selected[pos+1]];
+  saveSelected();
+  redrawAll();
+}
+
+/* 1人戻す */
+function undo(){
+  selected.pop();
+  saveSelected();
+  redrawAll();
+}
+
+/* リセット */
+function resetAll(){
+  selected = [];
+  saveSelected();
+  redrawAll();
+}
+
+/* ピラミッド（画面）：空きは＋、形は必ず1/2/3/5 */
 function drawPyramid(){
   const p=document.getElementById("pyramid");
   p.innerHTML="";
@@ -481,31 +569,41 @@ function drawPyramid(){
     row.className="row";
 
     for(let k=0;k<size;k++){
-      if(idx >= selected.length) break;
-
-      const m = trainees[selected[idx]];
       const slot=document.createElement("div");
-      slot.className="picked";
-      slot.innerHTML = `
-        <div class="avatarWrap">
-          <div class="avatar"><img src="${m.img}" alt=""></div>
-          <div class="rank">${idx+1}</div>
-        </div>
-        <div class="name">${m.name}</div>
-        <div class="reorder">
-          <button onclick="moveLeft(${idx})" aria-label="left">←</button>
-          <button onclick="moveRight(${idx})" aria-label="right">→</button>
-        </div>
-      `;
+
+      if(idx < selected.length){
+        const m = trainees[selected[idx]];
+        slot.className="picked";
+        slot.innerHTML = `
+          <div class="avatarWrap">
+            <div class="avatar">
+              <img src="${m.img}" alt="">
+              <div class="rank">${idx+1}</div>
+            </div>
+          </div>
+          <div class="name">${cleanName(m.name)}</div>
+          <div class="reorder">
+            <button onclick="moveLeft(${idx})" aria-label="left">←</button>
+            <button onclick="moveRight(${idx})" aria-label="right">→</button>
+          </div>
+        `;
+      } else {
+        slot.className="picked empty";
+        slot.innerHTML = `
+          <div class="avatarWrap">
+            <div class="avatar">+</div>
+          </div>
+        `;
+      }
+
       row.appendChild(slot);
       idx++;
     }
-
-    if(row.children.length>0) p.appendChild(row);
+    p.appendChild(row);
   });
 }
 
-/* 保存用（背景画像方式＝顔つぶれ激減） */
+/* ピラミッド（保存）：空きは＋、形は必ず1/2/3/5、ズレ＆潰れ防止 */
 function drawExportPyramid(){
   const p=document.getElementById("exportPyramid");
   p.innerHTML="";
@@ -516,65 +614,42 @@ function drawExportPyramid(){
     row.className="exportRow";
 
     for(let k=0;k<size;k++){
-      if(idx >= selected.length) break;
-
-      const m = trainees[selected[idx]];
       const slot=document.createElement("div");
-      slot.className="exportPicked";
-      slot.innerHTML = `
-        <div class="exportAvatar" style="background-image:url('${m.img}')"></div>
-        <div class="exportRank">${idx+1}</div>
-        <div class="exportName">${m.name}</div>
-      `;
+
+      if(idx < selected.length){
+        const m = trainees[selected[idx]];
+        slot.className="exportPicked";
+        slot.innerHTML = `
+          <div class="exportAvatarWrap">
+            <div class="exportAvatar" style="background-image:url('${m.img}')"></div>
+            <div class="exportRank">${idx+1}</div>
+          </div>
+          <div class="exportName">${cleanName(m.name)}</div>
+        `;
+      } else {
+        slot.className="exportPicked exportEmpty";
+        slot.innerHTML = `
+          <div class="exportAvatarWrap">
+            <div class="exportAvatar">+</div>
+          </div>
+        `;
+      }
+
       row.appendChild(slot);
       idx++;
     }
-
-    if(row.children.length>0) p.appendChild(row);
+    p.appendChild(row);
   });
 }
 
-/* 並び替え */
-function moveLeft(pos){
-  if(pos<=0) return;
-  [selected[pos-1], selected[pos]] = [selected[pos], selected[pos-1]];
-  saveSelected(); drawMembers(); drawPyramid(); drawExportPyramid();
-}
-function moveRight(pos){
-  if(pos>=selected.length-1) return;
-  [selected[pos+1], selected[pos]] = [selected[pos], selected[pos+1]];
-  saveSelected(); drawMembers(); drawPyramid(); drawExportPyramid();
-}
-
-/* 戻す/リセット */
-function undo(){
-  selected.pop();
-  saveSelected(); drawMembers(); drawPyramid(); drawExportPyramid();
-}
-function resetAll(){
-  selected=[];
-  saveSelected(); drawMembers(); drawPyramid(); drawExportPyramid();
-}
-
-/* 保存 */
-function saveSelected(){
-  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(selected)); }catch(e){}
-}
-function loadSelected(){
-  try{
-    const raw = localStorage.getItem(STORAGE_KEY);
-    const arr = raw ? JSON.parse(raw) : [];
-    return Array.isArray(arr) ? arr.filter(n=>Number.isInteger(n)) : [];
-  }catch(e){ return []; }
-}
-
-/* 画像保存（1004×924固定で生成） */
+/* 保存（1080×1350固定） */
 async function saveImage(){
   if(typeof html2canvas === "undefined"){
     alert("画像保存ライブラリの読み込みに失敗しました。");
     return;
   }
 
+  // 保存用を最新化
   drawExportPyramid();
 
   const toast=document.getElementById("toast");
@@ -594,16 +669,33 @@ async function saveImage(){
     link.href=canvas.toDataURL("image/png");
     link.click();
   }catch(e){
-    alert("画像生成に失敗しました。");
+    alert("画像生成に失敗しました（画像URL側の制限の可能性）。");
   }finally{
     toast.style.display="none";
   }
 }
 
-/* 初期 */
-drawMembers();
-drawPyramid();
-drawExportPyramid();
+/* localStorage */
+function saveSelected(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(selected)); }catch(e){}
+}
+function loadSelected(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    const arr = raw ? JSON.parse(raw) : [];
+    return Array.isArray(arr) ? arr.filter(n=>Number.isInteger(n)) : [];
+  }catch(e){ return []; }
+}
+
+function redrawAll(){
+  drawMembers();
+  drawPyramid();
+  // 保存は保存ボタン押したときに描いてもOKだけど、常に同期させたいのでここでも描く
+  drawExportPyramid();
+}
+
+/* 初期描画 */
+redrawAll();
 </script>
 
 </body>
